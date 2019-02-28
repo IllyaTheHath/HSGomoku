@@ -25,14 +25,7 @@ namespace HSGomoku.Engine.ScreenManage
         private static Boolean _started = false;
         private static Screen _previous = null;
 
-        // Public Members
-        private static Screen _activeScreen = null;
-
-        public static Screen ActiveScreen
-        {
-            get => _activeScreen;
-            set => _activeScreen = value;
-        }
+        public static Screen ActiveScreen { get; set; } = null;
 
         /// <summary>
         /// Add new Screen
@@ -66,22 +59,26 @@ namespace HSGomoku.Engine.ScreenManage
         /// <param name="name">Screen name</param>
         public static void GotoScreen(String name)
         {
+            if (ActiveScreen != null && ActiveScreen.Name == name)
+            {
+                return;
+            }
             foreach (Screen screen in _screens)
             {
                 if (screen.Name == name)
                 {
                     // Shutsdown Previous Screen
-                    _previous = _activeScreen;
-                    if (_activeScreen != null)
+                    _previous = ActiveScreen;
+                    if (ActiveScreen != null)
                     {
-                        _activeScreen.Shutdown();
+                        ActiveScreen.Shutdown();
                     }
                     // Inits New Screen
-                    _activeScreen = screen;
+                    ActiveScreen = screen;
                     if (_started)
                     {
-                        _activeScreen.Init();
-                        _activeScreen.LoadContent();
+                        ActiveScreen.Init();
+                        ActiveScreen.LoadContent();
                     }
 
                     return;
@@ -95,9 +92,9 @@ namespace HSGomoku.Engine.ScreenManage
         public static void Init()
         {
             _started = true;
-            if (_activeScreen != null)
+            if (ActiveScreen != null)
             {
-                _activeScreen.Init();
+                ActiveScreen.Init();
             }
         }
 
@@ -120,9 +117,9 @@ namespace HSGomoku.Engine.ScreenManage
                 return;
             }
 
-            if (_activeScreen != null)
+            if (ActiveScreen != null)
             {
-                _activeScreen.LoadContent();
+                ActiveScreen.LoadContent();
             }
         }
 
@@ -137,9 +134,9 @@ namespace HSGomoku.Engine.ScreenManage
                 return;
             }
 
-            if (_activeScreen != null)
+            if (ActiveScreen != null)
             {
-                _activeScreen.Update(gameTime);
+                ActiveScreen.Update(gameTime);
             }
         }
 
@@ -150,9 +147,9 @@ namespace HSGomoku.Engine.ScreenManage
                 return;
             }
 
-            if (_activeScreen != null)
+            if (ActiveScreen != null)
             {
-                _activeScreen.Draw(gameTime);
+                ActiveScreen.Draw(gameTime);
             }
         }
     }

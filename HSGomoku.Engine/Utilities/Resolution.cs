@@ -14,6 +14,8 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using static HSGomoku.Engine.Utilities.Statistics;
+
 namespace HSGomoku.Engine.Utilities
 {
     internal static class Resolution
@@ -27,6 +29,11 @@ namespace HSGomoku.Engine.Utilities
         private static Matrix _ScaleMatrix;
         private static Boolean _FullScreen = false;
         private static Boolean _dirtyMatrix = true;
+
+        /// <summary>
+        /// The scale result of merging VirtualScreen with WindowScreen
+        /// </summary>
+        public static Vector2 ScreenScale { get; private set; }
 
         public static void Init(ref GraphicsDeviceManager device)
         {
@@ -47,6 +54,18 @@ namespace HSGomoku.Engine.Utilities
             return _ScaleMatrix;
         }
 
+        public static void SetResolution(Vector2 resolution, Boolean FullScreen)
+        {
+            _Width = (Int32)resolution.X;
+            _Height = (Int32)resolution.Y;
+
+            _FullScreen = FullScreen;
+
+            CurrentResolution = resolution;
+
+            ApplyResolutionSettings();
+        }
+
         public static void SetResolution(Int32 Width, Int32 Height, Boolean FullScreen)
         {
             _Width = Width;
@@ -54,7 +73,17 @@ namespace HSGomoku.Engine.Utilities
 
             _FullScreen = FullScreen;
 
+            CurrentResolution = new Vector2(Width, Height);
+
             ApplyResolutionSettings();
+        }
+
+        public static void SetVirtualResolution(Vector2 resolution)
+        {
+            _VWidth = (Int32)resolution.X;
+            _VHeight = (Int32)resolution.Y;
+
+            _dirtyMatrix = true;
         }
 
         public static void SetVirtualResolution(Int32 Width, Int32 Height)
@@ -108,6 +137,10 @@ namespace HSGomoku.Engine.Utilities
 
             _Width = _Device.PreferredBackBufferWidth;
             _Height = _Device.PreferredBackBufferHeight;
+
+            Single widthScale = _Width / (Single)_VWidth;
+            Single heightScale = _Height / (Single)_VHeight;
+            ScreenScale = new Vector2(widthScale, heightScale);
         }
 
         /// <summary>

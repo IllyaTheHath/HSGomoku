@@ -12,7 +12,9 @@ namespace HSGomoku.Engine.Utilities
         public static Font Font8 { get; private set; }
         public static Font Font10 { get; private set; }
         public static Font Font14 { get; private set; }
+        public static Font Font16 { get; private set; }
         public static Font Font18 { get; private set; }
+        public static Font Font20 { get; private set; }
 
         public static void InitFont()
         {
@@ -32,7 +34,14 @@ namespace HSGomoku.Engine.Utilities
             Font8 = new Font(new FontFamily(_fontFamily), 8);
             Font10 = new Font(new FontFamily(_fontFamily), 10);
             Font14 = new Font(new FontFamily(_fontFamily), 14);
+            Font16 = new Font(new FontFamily(_fontFamily), 16);
             Font18 = new Font(new FontFamily(_fontFamily), 18);
+            Font20 = new Font(new FontFamily(_fontFamily), 20);
+        }
+
+        public static Font GetFont(Int32 fontSize)
+        {
+            return new Font(new FontFamily(_fontFamily), fontSize);
         }
 
         public static Boolean CheckFontExist(String fontName)

@@ -100,18 +100,26 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Conponents\Button.cs" />
+    <Compile Include="Conponents\ClickableControl.cs" />
+    <Compile Include="Conponents\ControlBase.cs" />
+    <Compile Include="Conponents\MenuButton.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="ScreenManage\Screen.cs" />
     <Compile Include="ScreenManage\ScreenManager.cs" />
     <Compile Include="Screens\GameScreen.cs" />
+    <Compile Include="Screens\HelpScreen.cs" />
     <Compile Include="Screens\SettingScreen.cs" />
-    <Compile Include="Screens\StartScreen.cs" />
+    <Compile Include="Screens\SplashScreen.cs" />
+    <Compile Include="Screens\MenuScreen.cs" />
     <Compile Include="UI\GameHUD.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Utilities\FNAFont.cs" />
     <Compile Include="UI\FpsCounter.cs" />
     <Compile Include="Utilities\Input.cs" />
+    <Compile Include="Utilities\MouseUtil.cs" />
     <Compile Include="Utilities\Resolution.cs" />
+    <Compile Include="Utilities\Statistics.cs" />
   </ItemGroup>
   <ItemGroup>
     <MonoGameContentReference Include="Content\Content.mgcb" />
@@ -124,17 +132,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Content\font\SourceHanSansCN.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Properties\app.manifest" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <MonoGamePlatform>Windows</MonoGamePlatform>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Content.Builder.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /y /d  "$(ProjectDir)fnalibs\x64\*.dll" "$(ProjectDir)$(OutDir)"</PostBuildEvent>
+    <PostBuildEvent>xcopy /y /d  "$(ProjectDir)\..\libs\fnalibs\x64\*.dll" "$(ProjectDir)$(OutDir)"
+xcopy /y /d  "$(ProjectDir)\..\libs\cef\*.dll" "$(ProjectDir)$(OutDir)"</PostBuildEvent>
   </PropertyGroup>
 </Project>

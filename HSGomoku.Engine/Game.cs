@@ -9,12 +9,17 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
+using static HSGomoku.Engine.Utilities.Statistics;
+
 namespace HSGomoku.Engine
 {
     internal sealed class Game : Microsoft.Xna.Framework.Game
     {
         private GraphicsDeviceManager _graphics;
-        private SpriteBatch _spriteBatch;
+        public GraphicsDeviceManager GraphicsDeviceManager { get { return this._graphics; } }
+
+        private readonly SpriteBatch _spriteBatch;
+        public SpriteBatch SpriteBatch { get { return this._spriteBatch; } }
 
         //private Texture2D _board;
 
@@ -24,9 +29,11 @@ namespace HSGomoku.Engine
         public Game()
         {
             this._graphics = new GraphicsDeviceManager(this);
+            this._spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // 帧率
-            TargetElapsedTime = TimeSpan.FromSeconds(1.0f / 120.0f);
+            CurrentGameFrameRate = GameFrameRate.F120;
+            TargetElapsedTime = TimeSpan.FromSeconds(1.0f / (Single)CurrentGameFrameRate);
             // 垂直同步
             this._graphics.SynchronizeWithVerticalRetrace = false;
 
@@ -40,8 +47,8 @@ namespace HSGomoku.Engine
         {
             // 分辨率
             Resolution.Init(ref this._graphics);
-            Resolution.SetVirtualResolution(1920, 1440);
-            Resolution.SetResolution(1920, 1440, false);
+            Resolution.SetVirtualResolution(SupportResolution.P1440);
+            Resolution.SetResolution(SupportResolution.P960, false);
             //Resolution.SetResolution(1024, 768, false);
 
             //Window.AllowUserResizing = true;
@@ -49,19 +56,23 @@ namespace HSGomoku.Engine
             Window.Title = "Gomoku";
 
             // 屏幕管理
-            ScreenManager.AddScreen(new StartScreen(GraphicsDevice, Content, this._graphics));
-            ScreenManager.AddScreen(new GameScreen(GraphicsDevice, Content, this._graphics));
-            ScreenManager.AddScreen(new SettingScreen(GraphicsDevice, Content, this._graphics));
+            ScreenManager.AddScreen(new SplashScreen(this));
+            ScreenManager.AddScreen(new MenuScreen(this));
+            ScreenManager.AddScreen(new GameScreen(this));
+            ScreenManager.AddScreen(new SettingScreen(this));
+            ScreenManager.AddScreen(new HelpScreen(this));
 
-            ScreenManager.GotoScreen(nameof(StartScreen));
+            ScreenManager.GotoScreen(nameof(MenuScreen));
             ScreenManager.Init();
+
+            // 游戏状态
+            CurrentGameState = GameState.Loading;
 
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            this._spriteBatch = new SpriteBatch(GraphicsDevice);
             ScreenManager.LoadContent();
             //this._board = Content.Load<Texture2D>("img\\board");
 

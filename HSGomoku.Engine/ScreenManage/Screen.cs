@@ -14,29 +14,24 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace HSGomoku.Engine.ScreenManage
 {
-    public class Screen
+    internal class Screen
     {
-        protected GraphicsDevice device = null;
-        protected SpriteBatch spriteBatch;
-        protected ContentManager content;
-        protected GraphicsDeviceManager graphics;
+        public Game Game { get; private set; }
 
-        protected String name;
-        public String Name { get { return this.name; } }
+        protected readonly GraphicsDevice _device;
+        protected readonly SpriteBatch _spriteBatch;
+        protected readonly ContentManager _content;
+        protected readonly GraphicsDeviceManager _graphics;
 
-        /// <summary>
-        /// Screen Constructor
-        /// </summary>
-        public Screen(GraphicsDevice device, ContentManager content, GraphicsDeviceManager graphics)
+        public String Name { get { return GetType().Name; } }
+
+        public Screen(Game game)
         {
-            this.device = device;
-            this.spriteBatch = new SpriteBatch(this.device);
-            this.content = content;
-            this.graphics = graphics;
-        }
-
-        ~Screen()
-        {
+            Game = game;
+            this._device = game.GraphicsDevice;
+            this._spriteBatch = game.SpriteBatch;
+            this._content = game.Content;
+            this._graphics = game.GraphicsDeviceManager;
         }
 
         /// <summary>
