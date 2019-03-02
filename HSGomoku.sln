@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HSGomoku.Engine", "HSGomoku
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpriteFontX", "SpriteFontX\SpriteFontX.csproj", "{537056C5-0155-4EA6-836E-D428F656DEBE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HSGomoku", "HSGomoku\HSGomoku.csproj", "{31DB3C26-5DB4-4AAA-A597-02FE1F94DEDC}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,18 +41,6 @@ Global
 		{537056C5-0155-4EA6-836E-D428F656DEBE}.Release|x64.Build.0 = Release|Any CPU
 		{537056C5-0155-4EA6-836E-D428F656DEBE}.Release|x86.ActiveCfg = Release|Any CPU
 		{537056C5-0155-4EA6-836E-D428F656DEBE}.Release|x86.Build.0 = Release|Any CPU
-		{31DB3C26-5DB4-4AAA-A597-02FE1F94DEDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{31DB3C26-5DB4-4AAA-A597-02FE1F94DEDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{31DB3C26-5DB4-4AAA-A597-02FE1F94DEDC}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{31DB3C26-5DB4-4AAA-A597-02FE1F94DEDC}.Debug|x64.Build.0 = Debug|Any CPU
-		{31DB3C26-5DB4-4AAA-A597-02FE1F94DEDC}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{31DB3C26-5DB4-4AAA-A597-02FE1F94DEDC}.Debug|x86.Build.0 = Debug|Any CPU
-		{31DB3C26-5DB4-4AAA-A597-02FE1F94DEDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{31DB3C26-5DB4-4AAA-A597-02FE1F94DEDC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{31DB3C26-5DB4-4AAA-A597-02FE1F94DEDC}.Release|x64.ActiveCfg = Release|Any CPU
-		{31DB3C26-5DB4-4AAA-A597-02FE1F94DEDC}.Release|x64.Build.0 = Release|Any CPU
-		{31DB3C26-5DB4-4AAA-A597-02FE1F94DEDC}.Release|x86.ActiveCfg = Release|Any CPU
-		{31DB3C26-5DB4-4AAA-A597-02FE1F94DEDC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

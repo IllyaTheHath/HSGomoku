@@ -21,9 +21,6 @@ namespace HSGomoku.Engine
         private readonly SpriteBatch _spriteBatch;
         public SpriteBatch SpriteBatch { get { return this._spriteBatch; } }
 
-        //private Texture2D _board;
-
-        //private readonly GameHUD _gameHUD = new GameHUD();
         private readonly FpsCounter _fpsCounter = new FpsCounter();
 
         public Game()
@@ -48,12 +45,10 @@ namespace HSGomoku.Engine
             // 分辨率
             Resolution.Init(ref this._graphics);
             Resolution.SetVirtualResolution(SupportResolution.P1440);
-            Resolution.SetResolution(SupportResolution.P960, false);
-            //Resolution.SetResolution(1024, 768, false);
+            Resolution.SetResolution(SupportResolution.P1440, false);
 
-            //Window.AllowUserResizing = true;
             IsMouseVisible = true;
-            Window.Title = "Gomoku";
+            Window.Title = "Anaki ♂ Gomoku";
 
             // 屏幕管理
             ScreenManager.AddScreen(new SplashScreen(this));
@@ -74,10 +69,6 @@ namespace HSGomoku.Engine
         protected override void LoadContent()
         {
             ScreenManager.LoadContent();
-            //this._board = Content.Load<Texture2D>("img\\board");
-
-            //// HUD
-            //this._gameHUD.Load(Content, this._graphics);
 
             // FPS计数器
             this._fpsCounter.Load(Content, this._graphics);
@@ -109,21 +100,6 @@ namespace HSGomoku.Engine
             Resolution.BeginDraw();
 
             ScreenManager.Draw(gameTime);
-
-            ////this._spriteBatch.Begin();
-            //this._spriteBatch.Begin(SpriteSortMode.BackToFront,
-            //                        BlendState.AlphaBlend,
-            //                        SamplerState.LinearClamp,
-            //                        DepthStencilState.Default,
-            //                        RasterizerState.CullNone,
-            //                        null,
-            //                        Resolution.GetTransformationMatrix());
-            //// 背景棋盘
-            //this._spriteBatch.Draw(this._board, Vector2.Zero, Color.White);
-            //this._spriteBatch.End();
-
-            //// HUD
-            //this._gameHUD.Draw(this._spriteBatch);
 
             // FPS计数器
             this._fpsCounter.Draw(this._spriteBatch);

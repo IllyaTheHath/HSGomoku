@@ -153,13 +153,13 @@ namespace HSGomoku.Engine.Screens
 
         private void ChangeResolution()
         {
-            if (CurrentResolution == SupportResolution.P960)
+            if (CurrentResolution == SupportResolution.P1440)
             {
-                Resolution.SetResolution(SupportResolution.P720, false);
+                Resolution.SetResolution(SupportResolution.P1080, false);
             }
             else
             {
-                Resolution.SetResolution(SupportResolution.P960, false);
+                Resolution.SetResolution(SupportResolution.P1440, false);
             }
         }
 

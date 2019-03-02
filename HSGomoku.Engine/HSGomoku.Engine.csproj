@@ -117,7 +117,7 @@
     <Compile Include="Utilities\FNAFont.cs" />
     <Compile Include="UI\FpsCounter.cs" />
     <Compile Include="Utilities\Input.cs" />
-    <Compile Include="Utilities\MouseUtil.cs" />
+    <Compile Include="Utilities\Mouse.cs" />
     <Compile Include="Utilities\Resolution.cs" />
     <Compile Include="Utilities\Statistics.cs" />
   </ItemGroup>

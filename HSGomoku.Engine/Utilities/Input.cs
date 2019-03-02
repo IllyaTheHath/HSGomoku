@@ -18,7 +18,7 @@ namespace HSGomoku.Engine.Utilities
             _keyboardState = Keyboard.GetState();
 
             _lastMouseState = _mouseState;
-            _mouseState = Mouse.GetState();
+            _mouseState = Microsoft.Xna.Framework.Input.Mouse.GetState();
         }
 
         #region Keyboard State

@@ -4,7 +4,6 @@ using HSGomoku.Engine.Utilities;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 namespace HSGomoku.Engine.Conponents
 {

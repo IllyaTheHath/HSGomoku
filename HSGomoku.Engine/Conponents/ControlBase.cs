@@ -205,7 +205,7 @@ namespace HSGomoku.Engine.Conponents
 
         public Boolean IsMouseOver(MouseState mouse)
         {
-            Rectangle mouseRectange = new Rectangle((Int32)(mouse.X / Resolution.ScreenScale.X), (Int32)(mouse.Y / Resolution.ScreenScale.Y), 1, 1);
+            Rectangle mouseRectange = new Rectangle(mouse.X, mouse.Y, 1, 1);
             if (mouseRectange.Intersects(BoundingBox))
             {
                 return true;
