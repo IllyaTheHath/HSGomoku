@@ -17,6 +17,17 @@ namespace HSGomoku.Engine.Utilities
 
         public static GameState CurrentGameState { get; set; }
 
+        public enum PlayerState
+        {
+            Black,
+            White,
+            None
+        }
+
+        public static PlayerState CurrentPlayerState { get; set; }
+
+        public static Vector2 LastChessPosition { get; set; }
+
         #endregion Game State
 
         #region Frame Rate

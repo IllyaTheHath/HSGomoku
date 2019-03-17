@@ -5,7 +5,7 @@ using HSGomoku.Engine.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace HSGomoku.Engine.Conponents
+namespace HSGomoku.Engine.Components
 {
     internal class ClickableControl : ControlBase
     {

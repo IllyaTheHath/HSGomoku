@@ -100,10 +100,12 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Conponents\Button.cs" />
-    <Compile Include="Conponents\ClickableControl.cs" />
-    <Compile Include="Conponents\ControlBase.cs" />
-    <Compile Include="Conponents\MenuButton.cs" />
+    <Compile Include="Components\Button.cs" />
+    <Compile Include="Components\ChessButton.cs" />
+    <Compile Include="Components\ClickableControl.cs" />
+    <Compile Include="Components\ControlBase.cs" />
+    <Compile Include="Components\GameBoard.cs" />
+    <Compile Include="Components\MenuButton.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="ScreenManage\Screen.cs" />
     <Compile Include="ScreenManage\ScreenManager.cs" />
@@ -120,6 +122,7 @@
     <Compile Include="Utilities\Mouse.cs" />
     <Compile Include="Utilities\Resolution.cs" />
     <Compile Include="Utilities\Statistics.cs" />
+    <Compile Include="Utilities\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <MonoGameContentReference Include="Content\Content.mgcb" />

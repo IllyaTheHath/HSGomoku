@@ -1,4 +1,4 @@
-﻿using HSGomoku.Engine.Conponents;
+﻿using HSGomoku.Engine.Components;
 using HSGomoku.Engine.ScreenManage;
 using HSGomoku.Engine.Utilities;
 

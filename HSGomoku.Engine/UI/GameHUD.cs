@@ -1,10 +1,13 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 using HSGomoku.Engine.Utilities;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+
+using static HSGomoku.Engine.Utilities.Statistics;
 
 namespace HSGomoku.Engine.UI
 {
@@ -50,8 +53,23 @@ namespace HSGomoku.Engine.UI
 
             // 对局信息
             spriteBatch.DrawStringX(this._fontX, "您是：玩家1", new Vector2(1470, 750), Color.Black);
-            spriteBatch.DrawStringX(this._fontX, "当前执子玩家：玩家1", new Vector2(1470, 800), Color.Black);
-            spriteBatch.DrawStringX(this._fontX, "上个棋子落点：H10", new Vector2(1470, 850), Color.Black);
+
+            String currentPlayer = String.Empty;
+            if (CurrentPlayerState == PlayerState.None)
+            {
+                currentPlayer = "无";
+            }
+            if (CurrentPlayerState == PlayerState.Black)
+            {
+                currentPlayer = "玩家1";
+            }
+            if (CurrentPlayerState == PlayerState.White)
+            {
+                currentPlayer = "玩家2";
+            }
+            spriteBatch.DrawStringX(this._fontX, $"当前执子玩家：{currentPlayer}", new Vector2(1470, 800), Color.Black);
+            String lastChessPosition = $"{Utils.NumberToAlphabet((Int32)LastChessPosition.X)}{(Int32)LastChessPosition.Y}";
+            spriteBatch.DrawStringX(this._fontX, $"上个棋子落点：{lastChessPosition}", new Vector2(1470, 850), Color.Black);
 
             spriteBatch.End();
         }

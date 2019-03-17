@@ -5,7 +5,7 @@ using HSGomoku.Engine.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace HSGomoku.Engine.Conponents
+namespace HSGomoku.Engine.Components
 {
     internal class MenuButton : ClickableControl
     {
@@ -48,28 +48,28 @@ namespace HSGomoku.Engine.Conponents
                 // 鼠标经过
                 if (IsMouseOver(mouse))
                 {
-                    if (Scale <= 1)
+                    if (this.scale <= 1)
                     {
                         this.scaleUp = true;
                     }
-                    if (Scale >= 1.35)
+                    if (this.scale >= 1.35)
                     {
                         this.scaleUp = false;
                     }
                     if (this.scaleUp)
                     {
-                        Scale += 0.01f * Statistics.SpeedMultiply;
+                        this.scale += 0.01f * Statistics.SpeedMultiply;
                     }
                     else
                     {
-                        Scale -= 0.01f * Statistics.SpeedMultiply;
+                        this.scale -= 0.01f * Statistics.SpeedMultiply;
                     }
                 }
                 else
                 {
-                    if (Scale > 1)
+                    if (this.scale > 1)
                     {
-                        Scale -= 0.01f * Statistics.SpeedMultiply;
+                        this.scale -= 0.01f * Statistics.SpeedMultiply;
                     }
                 }
             }

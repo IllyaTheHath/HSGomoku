@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Linq;
-
-using HSGomoku.Engine.Utilities;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace HSGomoku.Engine.Conponents
+namespace HSGomoku.Engine.Components
 {
     internal class ControlBase
     {
         protected Texture2D _texture;
-        protected SpriteFontX _fontX;
 
         // 是否已经初始化
         public Boolean Initialized { get; private set; } = false;
@@ -20,65 +16,25 @@ namespace HSGomoku.Engine.Conponents
         // 背景颜色
         public Color backColor = new Color(255, 255, 255, 255);
 
-        // 文字颜色
-        public Color textColor = new Color(255, 255, 255, 255);
-
-        // 文字大小
-        protected Int32 _textSize = 10;
-
-        public Int32 TextSize
-        {
-            get { return this._textSize; }
-            set
-            {
-                this._textSize = value;
-
-                if (!Suspended)
-                {
-                    OnTextSizeChanged();
-                }
-            }
-        }
-
-        // 组件显示文字
-        protected String _text = String.Empty;
-
-        public String Text
-        {
-            get { return this._text; }
-            set
-            {
-                this._text = value;
-
-                if (!Suspended)
-                {
-                    OnTextChanged(new EventArgs());
-                }
-            }
-        }
-
-        // 文字偏移量
-        public Vector2 FontOffset { get; set; } = Vector2.Zero;
-
         // 组件是否休眠
-        public Boolean Suspended { get; set; } = false;
+        public Boolean suspended = false;
 
         // 位置
-        public Vector2 Position { get; set; } = new Vector2(0, 0);
+        public Vector2 position = new Vector2(0, 0);
 
         // 大小
-        public Vector2 Size { get; set; } = new Vector2(32, 32);
+        public Vector2 size = new Vector2(32, 32);
 
-        public Single Scale { get; set; } = 1.0f;
+        public Single scale = 1.0f;
 
-        // 盒子大小
-        public Rectangle BoundingBox
-        {
-            get
-            {
-                return new Rectangle((Int32)Position.X, (Int32)Position.Y, (Int32)Size.X, (Int32)Size.Y);
-            }
-        }
+        //// 盒子大小
+        //public Rectangle BoundingBox
+        //{
+        //    get
+        //    {
+        //        return new Rectangle((Int32)this.position.X, (Int32)this.position.Y, (Int32)this.size.X, (Int32)this.size.Y);
+        //    }
+        //}
 
         // 是否启用
         protected Boolean _enabled = true;
@@ -93,7 +49,7 @@ namespace HSGomoku.Engine.Conponents
             {
                 this._enabled = value;
 
-                if (!Suspended)
+                if (!this.suspended)
                 {
                     OnEnabledChanged(new EventArgs());
                 }
@@ -113,14 +69,12 @@ namespace HSGomoku.Engine.Conponents
             {
                 this._visible = value;
 
-                if (!Suspended)
+                if (!this.suspended)
                 {
                     OnVisibleChanged(new EventArgs());
                 }
             }
         }
-
-        public event EventHandler TextChanged;
 
         public event EventHandler VisibleChanged;
 
@@ -133,8 +87,8 @@ namespace HSGomoku.Engine.Conponents
         public ControlBase(Texture2D texture, Vector2 position, Vector2 size)
         {
             this._texture = texture;
-            Position = position;
-            Size = size;
+            this.position = position;
+            this.size = size;
         }
 
         public virtual void Init()
@@ -153,10 +107,6 @@ namespace HSGomoku.Engine.Conponents
             if (!Initialized)
             {
                 Initialized = true;
-                if (this._text != String.Empty)
-                {
-                    this._fontX = new SpriteFontX(FNAFont.GetFont(TextSize), graphics);
-                }
             }
         }
 
@@ -166,10 +116,6 @@ namespace HSGomoku.Engine.Conponents
             {
                 Initialized = true;
                 this._texture = texture;
-                if (this._text != String.Empty)
-                {
-                    this._fontX = new SpriteFontX(FNAFont.GetFont(TextSize), graphics);
-                }
             }
         }
 
@@ -185,40 +131,26 @@ namespace HSGomoku.Engine.Conponents
                 //    BoundingBox,
                 //    this.backColor);
                 spriteBatch.Draw(this._texture,
-                    Position,
+                    this.position,
                     null,
                     this.backColor,
                     0f,
                     Vector2.Zero,
-                    Scale,
+                    this.scale,
                     SpriteEffects.None,
                     0f);
-                if (this._text != String.Empty && this._fontX != null)
-                {
-                    spriteBatch.DrawStringX(this._fontX,
-                        Text,
-                        new Vector2(Position.X + FontOffset.X, Position.Y + FontOffset.Y),
-                        this.textColor);
-                }
             }
         }
 
         public Boolean IsMouseOver(MouseState mouse)
         {
             Rectangle mouseRectange = new Rectangle(mouse.X, mouse.Y, 1, 1);
-            if (mouseRectange.Intersects(BoundingBox))
+            Rectangle boundingBox = new Rectangle((Int32)this.position.X, (Int32)this.position.Y, (Int32)this.size.X, (Int32)this.size.Y);
+            if (mouseRectange.Intersects(boundingBox))
             {
                 return true;
             }
             return false;
-        }
-
-        protected void OnTextChanged(EventArgs e)
-        {
-            if (TextChanged != null)
-            {
-                TextChanged.Invoke(this, e);
-            }
         }
 
         protected void OnVisibleChanged(EventArgs e)
@@ -235,11 +167,6 @@ namespace HSGomoku.Engine.Conponents
             {
                 EnabledChanged.Invoke(this, e);
             }
-        }
-
-        private void OnTextSizeChanged()
-        {
-            //this._fontX = new SpriteFontX(FNAFont.GetFont(TextSize), graphics);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using HSGomoku.Engine.Conponents;
+﻿using HSGomoku.Engine.Components;
 using HSGomoku.Engine.UI;
 using HSGomoku.Engine.Utilities;
 
@@ -13,6 +13,7 @@ namespace HSGomoku.Engine.Screens
     internal class GameScreen : Screen
     {
         private Texture2D _board;
+        private GameBoard _gameboard;
         private Button btnSurrender;
         private Button btnBack;
 
@@ -61,6 +62,9 @@ namespace HSGomoku.Engine.Screens
             // HUD
             this._gameHUD.Load(this._content, this._graphics);
 
+            // GameBoard
+            this._gameboard = new GameBoard(this._content);
+
             //// FPS计数器
             //this._fpsCounter.Load(this.content, this.graphics);
 
@@ -90,7 +94,7 @@ namespace HSGomoku.Engine.Screens
             {
                 this.btnBack.Update(gameTime);
             }
-
+            this._gameboard.Update(gameTime);
             base.Update(gameTime);
         }
 
@@ -127,6 +131,8 @@ namespace HSGomoku.Engine.Screens
 
             // HUD
             this._gameHUD.Draw(this._spriteBatch);
+
+            this._gameboard.Draw(this._spriteBatch, gameTime);
 
             //// FPS计数器
             //this._fpsCounter.Draw(this.spriteBatch);

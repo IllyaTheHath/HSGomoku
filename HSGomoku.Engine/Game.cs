@@ -45,7 +45,7 @@ namespace HSGomoku.Engine
             // 分辨率
             Resolution.Init(ref this._graphics);
             Resolution.SetVirtualResolution(SupportResolution.P1440);
-            Resolution.SetResolution(SupportResolution.P1440, false);
+            Resolution.SetResolution(SupportResolution.P960, false);
 
             IsMouseVisible = true;
             Window.Title = "Anaki ♂ Gomoku";

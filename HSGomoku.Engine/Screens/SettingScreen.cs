@@ -1,6 +1,6 @@
 ﻿using System;
 
-using HSGomoku.Engine.Conponents;
+using HSGomoku.Engine.Components;
 using HSGomoku.Engine.Utilities;
 
 using Microsoft.Xna.Framework;
