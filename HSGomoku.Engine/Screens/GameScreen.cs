@@ -1,4 +1,6 @@
-﻿using HSGomoku.Engine.Components;
+﻿using System;
+
+using HSGomoku.Engine.Components;
 using HSGomoku.Engine.UI;
 using HSGomoku.Engine.Utilities;
 
@@ -64,6 +66,7 @@ namespace HSGomoku.Engine.Screens
 
             // GameBoard
             this._gameboard = new GameBoard(this._content);
+            this._gameboard.WinningEvent += RaiseWinningEvent;
 
             //// FPS计数器
             //this._fpsCounter.Load(this.content, this.graphics);
@@ -138,6 +141,18 @@ namespace HSGomoku.Engine.Screens
             //this._fpsCounter.Draw(this.spriteBatch);
 
             base.Draw(gameTime);
+        }
+
+        public void RaiseWinningEvent(Object sender, EventArgs e)
+        {
+            new System.Threading.Tasks.Task(() =>
+            {
+                SDL2.SDL.SDL_ShowSimpleMessageBox(
+                                SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
+                                "胜利",
+                                "有一个玩家胜利了, 但是我还没写是谁, 而且我也没写以后的判断",
+                                Game.Window.Handle);
+            }).Start();
         }
     }
 }
