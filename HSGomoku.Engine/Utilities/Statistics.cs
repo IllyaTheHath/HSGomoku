@@ -19,12 +19,12 @@ namespace HSGomoku.Engine.Utilities
 
         public enum PlayerState
         {
+            None,
             Black,
-            White,
-            None
+            White
         }
 
-        public static PlayerState CurrentPlayerState { get; set; }
+        public static PlayerState CurrentPlayerState { get; set; } = PlayerState.None;
 
         public static Vector2 LastChessPosition { get; set; }
 

@@ -107,6 +107,7 @@
     <Compile Include="Components\GameBoard.cs" />
     <Compile Include="Components\MenuButton.cs" />
     <Compile Include="Game.cs" />
+    <Compile Include="Model\AI.cs" />
     <Compile Include="ScreenManage\Screen.cs" />
     <Compile Include="ScreenManage\ScreenManager.cs" />
     <Compile Include="Screens\GameScreen.cs" />

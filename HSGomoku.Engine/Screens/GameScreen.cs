@@ -1,23 +1,26 @@
 ﻿using System;
 
 using HSGomoku.Engine.Components;
+using HSGomoku.Engine.Model;
+using HSGomoku.Engine.ScreenManage;
 using HSGomoku.Engine.UI;
 using HSGomoku.Engine.Utilities;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-using Screen = HSGomoku.Engine.ScreenManage.Screen;
-using ScreenManager = HSGomoku.Engine.ScreenManage.ScreenManager;
+using static HSGomoku.Engine.Utilities.Statistics;
 
 namespace HSGomoku.Engine.Screens
 {
     internal class GameScreen : Screen
     {
         private Texture2D _board;
-        private GameBoard _gameboard;
         private Button btnSurrender;
         private Button btnBack;
+
+        private GameBoard _gameboard;
+        private AI _ai;
 
         private readonly GameHUD _gameHUD = new GameHUD();
         //private readonly FpsCounter _fpsCounter = new FpsCounter();
@@ -68,6 +71,9 @@ namespace HSGomoku.Engine.Screens
             this._gameboard = new GameBoard(this._content);
             this._gameboard.WinningEvent += RaiseWinningEvent;
 
+            // AI
+            this._ai = new AI();
+
             //// FPS计数器
             //this._fpsCounter.Load(this.content, this.graphics);
 
@@ -98,6 +104,13 @@ namespace HSGomoku.Engine.Screens
                 this.btnBack.Update(gameTime);
             }
             this._gameboard.Update(gameTime);
+
+            if (CurrentPlayerState == PlayerState.White)
+            {
+                this._ai.ComputerDo((Int32)LastChessPosition.X, (Int32)LastChessPosition.Y, out Int32 x, out Int32 y);
+                this._gameboard.PlaceChess(x, y);
+            }
+
             base.Update(gameTime);
         }
 
