@@ -13,6 +13,8 @@ namespace HSGomoku.Network
 
         public event Action<NetworkClientSession> OnNewClient;
 
+        public event Action<GameMessage> OnNewMessage;
+
         public void StartListen(String address, Int32 port)
         {
             IPAddress ip = IPAddress.Parse(address);
@@ -23,21 +25,22 @@ namespace HSGomoku.Network
             this._listenThread = new Thread(() =>
             {
                 Console.WriteLine($"Server Started At {address}:{port}");
-                //try
-                //{
-                while (true)
+                try
                 {
-                    var client = this._listener.AcceptTcpClient();
-                    NetworkClientSession session = new NetworkClientSession(client);
-                    session.GetRemoteConnectInf(out String saddress, out Int32 sport);
-                    Console.WriteLine($"New Client Connected:{saddress}:{sport}");
-                    OnNewClient?.Invoke(session);
+                    while (true)
+                    {
+                        var client = this._listener.AcceptTcpClient();
+                        NetworkClientSession session = new NetworkClientSession(client);
+                        session.GetRemoteConnectInf(out String saddress, out Int32 sport);
+                        Console.WriteLine($"New Client Connected:{saddress}:{sport}");
+                        session.MessageHandler += OnNewMessage ?? null;
+                        OnNewClient?.Invoke(session);
+                    }
                 }
-                //}
-                //catch (Exception e)
-                //{
-                //    Console.WriteLine(e.ToString());
-                //}
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
             });
             this._listenThread.Start();
         }
