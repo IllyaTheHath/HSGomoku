@@ -1,6 +1,8 @@
 ﻿using System;
 
-namespace HSGomoku.Engine
+using HSGomoku.Engine;
+
+namespace HSGomoku
 {
     public static class Program
     {

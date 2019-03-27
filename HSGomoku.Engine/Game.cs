@@ -13,7 +13,7 @@ using static HSGomoku.Engine.Utilities.Statistics;
 
 namespace HSGomoku.Engine
 {
-    internal sealed class Game : Microsoft.Xna.Framework.Game
+    public sealed class Game : Microsoft.Xna.Framework.Game
     {
         private GraphicsDeviceManager _graphics;
         public GraphicsDeviceManager GraphicsDeviceManager { get { return this._graphics; } }
@@ -22,6 +22,8 @@ namespace HSGomoku.Engine
         public SpriteBatch SpriteBatch { get { return this._spriteBatch; } }
 
         private readonly FpsCounter _fpsCounter = new FpsCounter();
+
+        public String Title { get; set; } = "Anaki ♂ Gomoku";
 
         public Game()
         {
@@ -48,7 +50,7 @@ namespace HSGomoku.Engine
             Resolution.SetResolution(SupportResolution.P960, false);
 
             IsMouseVisible = true;
-            Window.Title = "Anaki ♂ Gomoku";
+            Window.Title = Title;
 
             // 屏幕管理
             ScreenManager.AddScreen(new SplashScreen(this));
