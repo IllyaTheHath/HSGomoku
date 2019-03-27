@@ -42,9 +42,10 @@ namespace HSGomoku.Engine.Components
         //private readonly Int32[][] _map = new Int32[crossCount][];
         private readonly Dictionary<Vector2, ChessButton> _buttonMap = new Dictionary<Vector2, ChessButton>();
 
-        private static Vector2 lastPlay = new Vector2(-1, -1);
-
-        public event EventHandler WinningEvent;
+        public delegate void winDele(PlayerState p);
+        public event winDele WinningEvent;
+        public event EventHandler DrawEvent;
+        public Int32 _chessNumber;
 
         public GameBoard(ContentManager content)
         {
@@ -65,6 +66,7 @@ namespace HSGomoku.Engine.Components
                 }
             }
             CurrentPlayerState = PlayerState.Black;
+            this._chessNumber = 0;
         }
 
         public void Reset()
@@ -74,7 +76,7 @@ namespace HSGomoku.Engine.Components
                 button.Value.HasChess = false;
                 button.Value.IsBlack = true;
             }
-            lastPlay = new Vector2(-1, -1);
+            this._chessNumber = 0;
         }
 
         public void Update(GameTime gameTime)
@@ -114,13 +116,12 @@ namespace HSGomoku.Engine.Components
             if (CurrentPlayerState == PlayerState.White)
             {
                 chessButton.IsBlack = false;
-                CurrentPlayerState = PlayerState.Black;
             }
             else if (CurrentPlayerState == PlayerState.Black)
             {
                 chessButton.IsBlack = true;
-                CurrentPlayerState = PlayerState.White;
             }
+            this._chessNumber++;
 
             // 检测是否有玩家胜利
             var ctype = chessButton.IsBlack ? ChessType.Black : ChessType.White;
@@ -129,7 +130,19 @@ namespace HSGomoku.Engine.Components
 
             if (linkCount >= winChessCount)
             {
-                WinningEvent?.Invoke(this, new EventArgs());
+                WinningEvent?.Invoke(CurrentPlayerState);
+            }
+            else
+            {
+                // 检测是否平局
+                if (this._chessNumber == crossCount * crossCount)
+                {
+                    DrawEvent?.Invoke(this, new EventArgs());
+                }
+                else
+                {
+                    CurrentPlayerState = CurrentPlayerState == PlayerState.Black ? PlayerState.White : PlayerState.Black;
+                }
             }
         }
 

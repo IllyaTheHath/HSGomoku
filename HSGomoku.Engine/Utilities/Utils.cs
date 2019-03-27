@@ -8,7 +8,7 @@ namespace HSGomoku.Engine.Utilities
         {
             if (number < 1 || number > 36)
             {
-                return isCaps ? "A" : "a";
+                return "-1";
             }
 
             Char c = (Char)((isCaps ? 65 : 97) + number);

@@ -44,6 +44,7 @@ namespace HSGomoku.Engine.Screens
                 this._content.Load<Texture2D>("img\\button_surrender"),
                 new Vector2(1440, 1290),
                 new Vector2(144, 72));
+            this.btnSurrender.Click += Surrender;
             this.btnBack = new Button(
                 this._content.Load<Texture2D>("img\\button_back"),
                 new Vector2(1726, 1290),
@@ -59,6 +60,17 @@ namespace HSGomoku.Engine.Screens
             base.Init();
         }
 
+        private void Surrender(Object sender, EventArgs e)
+        {
+            CurrentPlayerState = PlayerState.None;
+            var result = SDL2.SDL.SDL_ShowSimpleMessageBox(
+                            SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
+                            "游戏结束",
+                            "你输了",
+                            Game.Window.Handle);
+            Reset();
+        }
+
         public override void LoadContent()
         {
             // 棋盘
@@ -70,6 +82,7 @@ namespace HSGomoku.Engine.Screens
             // GameBoard
             this._gameboard = new GameBoard(this._content);
             this._gameboard.WinningEvent += RaiseWinningEvent;
+            this._gameboard.DrawEvent += RaiseDrawEvent;
 
             // AI
             this._ai = new AI();
@@ -107,6 +120,10 @@ namespace HSGomoku.Engine.Screens
 
             if (CurrentPlayerState == PlayerState.White)
             {
+                if (LastChessPosition.X == -1 || LastChessPosition.Y == -1)
+                {
+                    return;
+                }
                 this._ai.ComputerDo((Int32)LastChessPosition.X, (Int32)LastChessPosition.Y, out Int32 x, out Int32 y);
                 this._gameboard.PlaceChess(x, y);
             }
@@ -156,16 +173,38 @@ namespace HSGomoku.Engine.Screens
             base.Draw(gameTime);
         }
 
-        public void RaiseWinningEvent(Object sender, EventArgs e)
+        public void RaiseWinningEvent(PlayerState p)
         {
-            new System.Threading.Tasks.Task(() =>
-            {
-                SDL2.SDL.SDL_ShowSimpleMessageBox(
-                                SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
-                                "胜利",
-                                "有一个玩家胜利了, 但是我还没写是谁, 而且我也没写以后的判断",
-                                Game.Window.Handle);
-            }).Start();
+            //new System.Threading.Tasks.Task(() =>
+            //{
+            CurrentPlayerState = PlayerState.None;
+            var result = SDL2.SDL.SDL_ShowSimpleMessageBox(
+                            SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
+                            "游戏结束",
+                            $"{(p == PlayerState.Black ? "黑棋" : "白旗")}胜利了",
+                            Game.Window.Handle);
+            Reset();
+            //}).Start();
+        }
+
+        private void RaiseDrawEvent(Object sender, EventArgs e)
+        {
+            CurrentPlayerState = PlayerState.None;
+            var result = SDL2.SDL.SDL_ShowSimpleMessageBox(
+                            SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
+                            "游戏结束",
+                            "平局",
+                            Game.Window.Handle);
+            Reset();
+        }
+
+        public void Reset()
+        {
+            this._ai = new AI();
+            this._gameboard.Reset();
+
+            LastChessPosition = new Vector2(-1, -1);
+            CurrentPlayerState = PlayerState.Black;
         }
     }
 }
