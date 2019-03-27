@@ -42,8 +42,8 @@ namespace HSGomoku.Engine.Components
         //private readonly Int32[][] _map = new Int32[crossCount][];
         private readonly Dictionary<Vector2, ChessButton> _buttonMap = new Dictionary<Vector2, ChessButton>();
 
-        public delegate void winDele(PlayerState p);
-        public event winDele WinningEvent;
+        //public delegate void winDele(PlayerState p);
+        public event Action<PlayerState> WinningEvent;
         public event EventHandler DrawEvent;
         public Int32 _chessNumber;
 

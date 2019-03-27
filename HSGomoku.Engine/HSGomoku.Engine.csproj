@@ -122,6 +122,10 @@
     <MonoGameContentReference Include="Content\Content.mgcb" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\HSGomoku.Network\HSGomoku.Network.csproj">
+      <Project>{bab7d273-a64c-4c00-86bd-c3bdb70c3e5c}</Project>
+      <Name>HSGomoku.Network</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SpriteFontX\SpriteFontX.csproj">
       <Project>{537056c5-0155-4ea6-836e-d428f656debe}</Project>
       <Name>SpriteFontX</Name>
