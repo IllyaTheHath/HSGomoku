@@ -17,8 +17,9 @@ namespace HSGomoku.Network.Utils
                     return memory.ToArray();
                 }
             }
-            catch
+            catch (Exception e)
             {
+                Console.WriteLine(e);
                 return null;
             }
         }
@@ -32,8 +33,9 @@ namespace HSGomoku.Network.Utils
                     return Serializer.Deserialize<T>(memory);
                 }
             }
-            catch
+            catch (Exception e)
             {
+                Console.WriteLine(e);
                 return default(T);
             }
         }

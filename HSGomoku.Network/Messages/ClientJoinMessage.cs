@@ -1,6 +1,4 @@
-﻿using System;
-
-using ProtoBuf;
+﻿using ProtoBuf;
 
 namespace HSGomoku.Network.Messages
 {
@@ -9,10 +7,8 @@ namespace HSGomoku.Network.Messages
     {
         public ClientJoinMessage()
         {
-            this.stateCode = MsgCode.ClientJoin;
+            MsgCode = MsgCode.ClientJoin;
+            Content = "Client Join";
         }
-
-        [ProtoMember(1)]
-        public String id;
     }
 }

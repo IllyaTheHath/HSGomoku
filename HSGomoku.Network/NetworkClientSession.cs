@@ -5,6 +5,7 @@ using System.Net.Sockets;
 
 using System.Threading;
 
+using HSGomoku.Network.Messages;
 using HSGomoku.Network.Utils;
 
 namespace HSGomoku.Network
@@ -15,9 +16,17 @@ namespace HSGomoku.Network
         private readonly BinaryWriter writer;
         private BinaryReader reader;
 
+        public Int32 Id { get; }
+
         public event Action<GameMessage> MessageHandler;
 
-        private readonly Thread _recieveThread = null;
+        private readonly Thread _recieveThread;
+        private Boolean _threadAbort;
+
+        public NetworkClientSession()
+        {
+            this._threadAbort = false;
+        }
 
         public Boolean Connected
         {
@@ -27,9 +36,10 @@ namespace HSGomoku.Network
             }
         }
 
-        public NetworkClientSession(TcpClient client)
+        public NetworkClientSession(TcpClient client, Int32 id)
         {
             this.client = client;
+            Id = id;
             this.writer = new BinaryWriter(client.GetStream());
             this.reader = new BinaryReader(client.GetStream());
 
@@ -39,14 +49,20 @@ namespace HSGomoku.Network
                 {
                     while (true)
                     {
+                        if (this._threadAbort)
+                        {
+                            break;
+                        }
+
                         Int32 length = this.reader.ReadInt32();
                         var data = this.reader.ReadBytes(length);
                         var msg = ProtoBufTools.Deserialize<GameMessage>(data);
                         MessageHandler(msg);
                     }
                 }
-                catch
+                catch (Exception e)
                 {
+                    Console.WriteLine(e);
                 }
             });
             this._recieveThread.Start();
@@ -57,12 +73,6 @@ namespace HSGomoku.Network
             var remoteIpEndPoint = this.client.Client.RemoteEndPoint as IPEndPoint;
             address = remoteIpEndPoint.Address.ToString();
             port = remoteIpEndPoint.Port;
-        }
-
-        public void Close()
-        {
-            this._recieveThread.Abort();
-            this.client.Close();
         }
 
         public void Send(GameMessage msg)
@@ -80,6 +90,12 @@ namespace HSGomoku.Network
 
             this.writer.Write(data.Length);
             this.writer.Write(data);
+        }
+
+        public void Close()
+        {
+            this.client.Close();
+            this._threadAbort = true;
         }
     }
 }

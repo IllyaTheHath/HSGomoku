@@ -9,11 +9,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpriteFontX", "SpriteFontX\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HSGomoku", "HSGomoku\HSGomoku.csproj", "{102FE1EE-D59F-4FB7-9ADB-4AE7CBF81913}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HSGomoku.Network", "HSGomoku.Network\HSGomoku.Network.csproj", "{BAB7D273-A64C-4C00-86BD-C3BDB70C3E5C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HSGomoku.Network", "HSGomoku.Network\HSGomoku.Network.csproj", "{BAB7D273-A64C-4C00-86BD-C3BDB70C3E5C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HSGomoku.Server", "HSGomoku.Server\HSGomoku.Server.csproj", "{AF71418B-2846-4D42-B585-8986B16F8276}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HSGomoku.Server", "HSGomoku.Server\HSGomoku.Server.csproj", "{AF71418B-2846-4D42-B585-8986B16F8276}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HSGomoku.Client", "HSGomoku.Client\HSGomoku.Client.csproj", "{6F00651F-0CF0-4639-97B4-2566C5100756}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HSGomoku.Client", "HSGomoku.Client\HSGomoku.Client.csproj", "{6F00651F-0CF0-4639-97B4-2566C5100756}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

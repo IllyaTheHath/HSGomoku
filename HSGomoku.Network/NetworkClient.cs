@@ -5,6 +5,7 @@ using System.Net.Sockets;
 
 using System.Threading;
 
+using HSGomoku.Network.Messages;
 using HSGomoku.Network.Utils;
 
 namespace HSGomoku.Network
@@ -17,7 +18,13 @@ namespace HSGomoku.Network
 
         public event Action<GameMessage> MessageHandler;
 
-        private Thread _recieveThread = null;
+        private Thread _recieveThread;
+        private Boolean _threadAbort;
+
+        public NetworkClient()
+        {
+            this._threadAbort = false;
+        }
 
         public Boolean Connected
         {
@@ -42,17 +49,24 @@ namespace HSGomoku.Network
                 {
                     while (true)
                     {
+                        if (this._threadAbort)
+                        {
+                            break;
+                        }
+
                         Int32 length = this.reader.ReadInt32();
                         var data = this.reader.ReadBytes(length);
                         var msg = ProtoBufTools.Deserialize<GameMessage>(data);
                         MessageHandler?.Invoke(msg);
                     }
                 }
-                catch
+                catch (Exception e)
                 {
+                    Console.WriteLine(e);
                 }
             });
             this._recieveThread.Start();
+            Send(new ClientJoinMessage());
         }
 
         public void Send(GameMessage msg)
@@ -72,10 +86,15 @@ namespace HSGomoku.Network
             this.writer.Write(data);
         }
 
-        public void Close()
+        public void Close(Boolean sendLeaveMsg)
         {
-            this._recieveThread.Abort();
+            if (sendLeaveMsg)
+            {
+                Send(new ClientLeaveMessage());
+            }
+
             this.clientSocket.Close();
+            this._threadAbort = true;
         }
     }
 }

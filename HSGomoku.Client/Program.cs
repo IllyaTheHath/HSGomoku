@@ -1,6 +1,7 @@
 ﻿using System;
 
 using HSGomoku.Network;
+using HSGomoku.Network.Messages;
 
 namespace HSGomoku.Client
 {
@@ -10,17 +11,23 @@ namespace HSGomoku.Client
         {
             String address = "127.0.0.1";
             Int32 port = 13459;
-            NetworkClient client = NetworkFactory.CreateNetworkClient();
+            NetworkClient client = new NetworkClient();
             client.MessageHandler += (message) =>
             {
-                Console.WriteLine($"Server Said:stateCode={message.stateCode},content={message.content}");
-                Console.WriteLine("Send Hello Back To Server");
-                client.Send(new GameMessage() { stateCode = 1001, content = "Hello Back From Client" });
+                if (message.MsgCode != MsgCode.ServerShutdown)
+                {
+                    Console.WriteLine($"Server Said:msgCode={message.MsgCode},content={message.Content}");
+                    Console.WriteLine("Send Hello Back To Server");
+                    client.Send(new GameMessage() { MsgCode = MsgCode.Hello, Content = "Hello Back From Client" });
+                }
+                else
+                {
+                    client.Close(false);
+                }
             };
             client.Connect(address, port);
-            //AsyncTCPClient client = new AsyncTCPClient();
-            //client.AsynConnect();
-            //Console.ReadLine();
+            Console.ReadLine();
+            client.Close(true);
         }
     }
 }
