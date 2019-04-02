@@ -16,12 +16,14 @@ namespace HSGomoku.Engine.Screens
     internal class SingleGameScreen : Screen, IGameScreen
     {
         private Texture2D _board;
-        private Button btnSurrender;
-        private Button btnBack;
+        private Button _btnSurrender;
+        private Button _btnBack;
         private GameHUD _gameHUD;
 
         private GameBoard _gameboard;
         private AI _ai;
+
+        private Boolean _surrender = false;
 
         public SingleGameScreen(Game game) : base(game)
         {
@@ -29,22 +31,26 @@ namespace HSGomoku.Engine.Screens
 
         public override void Init()
         {
-            this.btnSurrender = new Button(
+            this._btnSurrender = new Button(
                 this._content.Load<Texture2D>("img\\button_surrender"),
                 new Vector2(1440, 1290),
                 new Vector2(144, 72));
-            this.btnSurrender.Click += Surrender;
-            this.btnBack = new Button(
+            this._btnSurrender.Click += (s, e) =>
+            {
+                this._surrender = true;
+            };
+            this._btnBack = new Button(
                 this._content.Load<Texture2D>("img\\button_back"),
                 new Vector2(1726, 1290),
                 new Vector2(144, 72));
-            this.btnBack.Click += (s, e) =>
+            this._btnBack.Click += (s, e) =>
             {
+                Reset();
                 ScreenManager.GoBack();
             };
 
-            this.btnSurrender.Init();
-            this.btnBack.Init();
+            this._btnSurrender.Init();
+            this._btnBack.Init();
 
             this._gameHUD = new GameHUD();
 
@@ -55,17 +61,6 @@ namespace HSGomoku.Engine.Screens
             this._ai = new AI();
 
             base.Init();
-        }
-
-        private void Surrender(Object sender, EventArgs e)
-        {
-            CurrentPlayerState = PlayerState.None;
-            var result = SDL2.SDL.SDL_ShowSimpleMessageBox(
-                            SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
-                            "游戏结束",
-                            "你输了",
-                            Game.Window.Handle);
-            Reset();
         }
 
         public override void LoadContent()
@@ -82,8 +77,8 @@ namespace HSGomoku.Engine.Screens
         public override void Shutdown()
         {
             this._board = null;
-            this.btnSurrender = null;
-            this.btnBack = null;
+            this._btnSurrender = null;
+            this._btnBack = null;
             this._gameHUD = null;
 
             this._gameboard = null;
@@ -94,9 +89,14 @@ namespace HSGomoku.Engine.Screens
 
         public override void Update(GameTime gameTime)
         {
-            this.btnSurrender?.Update(gameTime);
-            this.btnBack?.Update(gameTime);
+            this._btnSurrender?.Update(gameTime);
+            this._btnBack?.Update(gameTime);
             this._gameboard?.Update(gameTime);
+
+            if (this._surrender)
+            {
+                RaiseSurrenderEvent(CurrentPlayerState);
+            }
 
             if (CurrentPlayerState == PlayerState.White)
             {
@@ -129,9 +129,9 @@ namespace HSGomoku.Engine.Screens
 
             this._spriteBatch?.Draw(this._board, Vector2.Zero, Color.White);
 
-            this.btnSurrender?.Draw(this._spriteBatch, gameTime);
+            this._btnSurrender?.Draw(this._spriteBatch, gameTime);
 
-            this.btnBack?.Draw(this._spriteBatch, gameTime);
+            this._btnBack?.Draw(this._spriteBatch, gameTime);
 
             this._spriteBatch.End();
 
@@ -143,10 +143,19 @@ namespace HSGomoku.Engine.Screens
             base.Draw(gameTime);
         }
 
+        private void RaiseSurrenderEvent(PlayerState p)
+        {
+            CurrentPlayerState = PlayerState.None;
+            var result = SDL2.SDL.SDL_ShowSimpleMessageBox(
+                            SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
+                            "游戏结束",
+                            $"{(p == PlayerState.Black ? "黑棋" : "白旗")}认输了",
+                            Game.Window.Handle);
+            Reset();
+        }
+
         public void RaiseWinningEvent(PlayerState p)
         {
-            //new System.Threading.Tasks.Task(() =>
-            //{
             CurrentPlayerState = PlayerState.None;
             SDL2.SDL.SDL_ShowSimpleMessageBox(
                             SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
@@ -154,10 +163,9 @@ namespace HSGomoku.Engine.Screens
                             $"{(p == PlayerState.Black ? "黑棋" : "白旗")}胜利了",
                             Game.Window.Handle);
             Reset();
-            //}).Start();
         }
 
-        private void RaiseDrawEvent(Object sender, EventArgs e)
+        private void RaiseDrawEvent()
         {
             CurrentPlayerState = PlayerState.None;
             SDL2.SDL.SDL_ShowSimpleMessageBox(
@@ -168,9 +176,15 @@ namespace HSGomoku.Engine.Screens
             Reset();
         }
 
+        private void RaisePlaceChessEvent()
+        {
+            CurrentPlayerState = CurrentPlayerState == PlayerState.Black ? PlayerState.White : PlayerState.Black;
+        }
+
         public void Reset()
         {
             this._ai = new AI();
+            this._surrender = false;
             this._gameboard.Reset();
 
             LastChessPosition = new Vector2(-1, -1);
@@ -219,11 +233,11 @@ namespace HSGomoku.Engine.Screens
                 // 检测是否平局
                 if (this._gameboard._chessNumber == GameBoard.crossCount * GameBoard.crossCount)
                 {
-                    RaiseDrawEvent(this, new EventArgs());
+                    RaiseDrawEvent();
                 }
                 else
                 {
-                    CurrentPlayerState = CurrentPlayerState == PlayerState.Black ? PlayerState.White : PlayerState.Black;
+                    RaisePlaceChessEvent();
                 }
             }
         }

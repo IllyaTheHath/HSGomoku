@@ -93,5 +93,10 @@ namespace HSGomoku.Network
             this._client.Disconnect(bye);
             this._client.Shutdown(bye);
         }
+
+        public void DecryptMessage(NetIncomingMessage msg)
+        {
+            msg.Decrypt(this._algo);
+        }
     }
 }

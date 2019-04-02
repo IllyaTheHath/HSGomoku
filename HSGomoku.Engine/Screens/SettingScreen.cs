@@ -13,61 +13,44 @@ namespace HSGomoku.Engine.Screens
 {
     internal class SettingScreen : Screen
     {
-        private Button btnRes;
-        private Button btnFrame;
-        private Button btnBack;
+        private Button _btnRes;
+        private Button _btnFrame;
+        private Button _btnBack;
 
         public SettingScreen(Game game) : base(game)
         {
-            //Name = "SettingScreen";
-            //this.btnRes = new Button(
-            //    this.content.Load<Texture2D>("img\\button_res"),
-            //    new Vector2(400, 400),
-            //    new Vector2(144, 72));
-            //this.btnRes.Click += (s, e) =>
-            //{
-            //    ChangeResolution();
-            //};
-            //this.btnBack = new Button(
-            //    this.content.Load<Texture2D>("img\\button_back"),
-            //    new Vector2(800, 400),
-            //    new Vector2(144, 72));
-            //this.btnBack.Click += (s, e) =>
-            //{
-            //    ScreenManager.GoBack();
-            //};
         }
 
         public override void Init()
         {
-            this.btnRes = new Button(
+            this._btnRes = new Button(
                 this._content.Load<Texture2D>("img\\button_res"),
                 new Vector2(400, 400),
                 new Vector2(144, 72));
-            this.btnRes.Click += (s, e) =>
+            this._btnRes.Click += (s, e) =>
             {
                 ChangeResolution();
             };
-            this.btnFrame = new Button(
+            this._btnFrame = new Button(
                 this._content.Load<Texture2D>("img\\button_framerate"),
                 new Vector2(400, 600),
                 new Vector2(144, 72));
-            this.btnFrame.Click += (s, e) =>
+            this._btnFrame.Click += (s, e) =>
             {
                 ChangeFrameRate();
             };
-            this.btnBack = new Button(
+            this._btnBack = new Button(
                 this._content.Load<Texture2D>("img\\button_back"),
                 new Vector2(400, 800),
                 new Vector2(144, 72));
-            this.btnBack.Click += (s, e) =>
+            this._btnBack.Click += (s, e) =>
             {
                 ScreenManager.GoBack();
             };
 
-            this.btnRes.Init();
-            this.btnFrame.Init();
-            this.btnBack.Init();
+            this._btnRes.Init();
+            this._btnFrame.Init();
+            this._btnBack.Init();
 
             base.Init();
         }
@@ -79,9 +62,9 @@ namespace HSGomoku.Engine.Screens
 
         public override void Shutdown()
         {
-            this.btnRes = null;
-            this.btnFrame = null;
-            this.btnBack = null;
+            this._btnRes = null;
+            this._btnFrame = null;
+            this._btnBack = null;
 
             base.Shutdown();
         }
@@ -103,11 +86,11 @@ namespace HSGomoku.Engine.Screens
             //    ToggleFullScreen();
             //}
 
-            this.btnRes?.Update(gameTime);
+            this._btnRes?.Update(gameTime);
 
-            this.btnFrame?.Update(gameTime);
+            this._btnFrame?.Update(gameTime);
 
-            this.btnBack?.Update(gameTime);
+            this._btnBack?.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -125,11 +108,11 @@ namespace HSGomoku.Engine.Screens
                                 null,
                                 Resolution.GetTransformationMatrix());
 
-            this.btnRes?.Draw(this._spriteBatch, gameTime);
+            this._btnRes?.Draw(this._spriteBatch, gameTime);
 
-            this.btnFrame?.Draw(this._spriteBatch, gameTime);
+            this._btnFrame?.Draw(this._spriteBatch, gameTime);
 
-            this.btnBack?.Draw(this._spriteBatch, gameTime);
+            this._btnBack?.Draw(this._spriteBatch, gameTime);
 
             this._spriteBatch.End();
 

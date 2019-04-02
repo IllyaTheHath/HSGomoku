@@ -142,5 +142,10 @@ namespace HSGomoku.Network
         {
             this._server.Shutdown(bye);
         }
+
+        public void DecryptMessage(NetIncomingMessage msg)
+        {
+            msg.Decrypt(this._algo);
+        }
     }
 }

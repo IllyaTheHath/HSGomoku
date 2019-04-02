@@ -9,7 +9,7 @@ namespace HSGomoku.Engine.Screens
 {
     internal class HelpScreen : Screen
     {
-        private Button btnBack;
+        private Button _btnBack;
 
         public HelpScreen(Game game) : base(game)
         {
@@ -17,30 +17,30 @@ namespace HSGomoku.Engine.Screens
 
         public override void Init()
         {
-            this.btnBack = new Button(
+            this._btnBack = new Button(
                 this._content.Load<Texture2D>("img\\button_back"),
                 new Vector2(400, 800),
                 new Vector2(144, 72));
-            this.btnBack.Click += (s, e) =>
+            this._btnBack.Click += (s, e) =>
             {
                 ScreenManager.GoBack();
             };
 
-            this.btnBack.Init();
+            this._btnBack.Init();
 
             base.Init();
         }
 
         public override void Shutdown()
         {
-            this.btnBack = null;
+            this._btnBack = null;
 
             base.Shutdown();
         }
 
         public override void Update(GameTime gameTime)
         {
-            this.btnBack?.Update(gameTime);
+            this._btnBack?.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -58,7 +58,7 @@ namespace HSGomoku.Engine.Screens
                                 null,
                                 Resolution.GetTransformationMatrix());
 
-            this.btnBack?.Draw(this._spriteBatch, gameTime);
+            this._btnBack?.Draw(this._spriteBatch, gameTime);
 
             this._spriteBatch.End();
 

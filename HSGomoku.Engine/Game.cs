@@ -81,31 +81,37 @@ namespace HSGomoku.Engine
 
         protected override void Update(GameTime gameTime)
         {
-            Input.Update();
+            if (IsActive)
+            {
+                Input.Update();
 
 #if DEBUG
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-            {
-                Exit();
-            }
+                if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+                {
+                    Exit();
+                }
 #endif
-            ScreenManager.Update(gameTime);
+                ScreenManager.Update(gameTime);
 
-            this._fpsCounter.Update(gameTime);
+                this._fpsCounter.Update(gameTime);
+            }
 
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            // 清理
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-            Resolution.BeginDraw();
+            if (IsActive)
+            {
+                // 清理
+                GraphicsDevice.Clear(Color.CornflowerBlue);
+                Resolution.BeginDraw();
 
-            ScreenManager.Draw(gameTime);
+                ScreenManager.Draw(gameTime);
 
-            // FPS计数器
-            this._fpsCounter.Draw(this._spriteBatch);
+                // FPS计数器
+                this._fpsCounter.Draw(this._spriteBatch);
+            }
 
             base.Draw(gameTime);
         }
