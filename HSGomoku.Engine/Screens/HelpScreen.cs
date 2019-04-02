@@ -40,10 +40,7 @@ namespace HSGomoku.Engine.Screens
 
         public override void Update(GameTime gameTime)
         {
-            if (this.btnBack != null)
-            {
-                this.btnBack.Update(gameTime);
-            }
+            this.btnBack?.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -60,10 +57,8 @@ namespace HSGomoku.Engine.Screens
                                 RasterizerState.CullNone,
                                 null,
                                 Resolution.GetTransformationMatrix());
-            if (this.btnBack != null)
-            {
-                this.btnBack.Draw(this._spriteBatch, gameTime);
-            }
+
+            this.btnBack?.Draw(this._spriteBatch, gameTime);
 
             this._spriteBatch.End();
 

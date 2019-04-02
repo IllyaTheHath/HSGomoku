@@ -1,6 +1,9 @@
-﻿namespace HSGomoku.Network.Messages
+﻿using System;
+
+namespace HSGomoku.Network.Messages
 {
-    internal class ServerShutdownMessage : GameMessage
+    [Serializable]
+    public sealed class ServerShutdownMessage : GameMessage
     {
         public ServerShutdownMessage()
         {

@@ -1,121 +1,146 @@
 ﻿using System;
 using System.Net;
-using System.Net.Sockets;
 using System.Threading;
 
 using HSGomoku.Network.Messages;
+using HSGomoku.Network.Utils;
+
+using Lidgren.Network;
 
 namespace HSGomoku.Network
 {
     public class NetworkServer
     {
-        private TcpListener _listener;
+        private readonly NetPeerConfiguration _config;
+        private readonly NetServer _server;
+        private readonly NetEncryption _algo;
 
-        private Thread _listenThread;
-        private Boolean _threadAbort;
-        private readonly NetworkClientSession[] _sessions;
-
-        private readonly Boolean[] usedUserID;
-
-        public event Action<NetworkClientSession> OnNewClient;
-
-        public event Action<GameMessage> OnNewMessage;
+        public NetServer NetServer { get { return this._server; } }
 
         public NetworkServer()
         {
-            this._sessions = new NetworkClientSession[NetworkSetting.MaxConnectClient];
-            this.usedUserID = new Boolean[NetworkSetting.MaxConnectClient];
-            this._threadAbort = false;
+            this._config = new NetPeerConfiguration(NetworkSetting.AppIdentifier);
+            this._config.LocalAddress = IPAddress.Parse(NetworkSetting.IpAddress);
+            this._config.Port = NetworkSetting.Port;
+
+            this._config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
+            this._config.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
+
+            this._server = new NetServer(this._config);
+            // create the Synchronization Context
+            SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
+            this._server.RegisterReceivedCallback(new SendOrPostCallback(OnMessage));
+
+            this._algo = new NetXtea(this._server, NetworkSetting.Encryptionkey);
         }
 
-        public void StartListen(String address, Int32 port)
+        public void OnMessage(Object peer)
         {
-            IPAddress ip = IPAddress.Parse(address);
+            var p = peer as NetPeer;
+            NetIncomingMessage msg;
 
-            this._listener = new TcpListener(ip, port);
-            this._listener.Start();
-
-            this._listenThread = new Thread(() =>
+            while ((msg = p.ReadMessage()) != null)
             {
-                Console.WriteLine($"Server Started At {address}:{port}");
-                try
+                msg.Decrypt(this._algo);
+
+                switch (msg.MessageType)
                 {
-                    while (true)
-                    {
-                        if (this._threadAbort)
+                    case NetIncomingMessageType.DiscoveryRequest:
+                        ResponseDiscovery(msg.SenderEndPoint);
+                        break;
+
+                    case NetIncomingMessageType.ConnectionApproval:
+                        String s = msg.ReadString();
+                        if (s == NetworkSetting.Encryptionkey)
                         {
-                            break;
+                            msg.SenderConnection.Approve();
                         }
-
-                        var client = this._listener.AcceptTcpClient();
-
-                        Int32 id = -1;
-                        for (var i = 0; i < this.usedUserID.Length; i++)
+                        else
                         {
-                            if (this.usedUserID[i] == false)
-                            {
-                                id = i;
-                                break;
-                            }
+                            msg.SenderConnection.Deny();
                         }
+                        break;
 
-                        if (id == -1)
+                    case NetIncomingMessageType.VerboseDebugMessage:
+                    case NetIncomingMessageType.DebugMessage:
+                    case NetIncomingMessageType.WarningMessage:
+                    case NetIncomingMessageType.ErrorMessage:
+                        Console.WriteLine(msg.ReadString());
+                        break;
+
+                    case NetIncomingMessageType.StatusChanged:
+                        NetConnectionStatus status = (NetConnectionStatus)msg.ReadByte();
+                        if (status == NetConnectionStatus.Connected)
                         {
-                            Console.WriteLine("Client " + client.Client.RemoteEndPoint.ToString() + " cannot connect. ");
-                            client.Close();
-                            continue;
+                            Console.WriteLine(msg.SenderConnection.RemoteUniqueIdentifier + " connected!");
                         }
+                        else if (status == NetConnectionStatus.Disconnected)
+                        {
+                            Console.WriteLine(msg.SenderConnection.RemoteUniqueIdentifier + " disconnected!");
+                        }
+                        break;
 
-                        this.usedUserID[id] = true;
-                        NetworkClientSession session = new NetworkClientSession(client, id);
-                        this._sessions[id] = session;
-                        session.GetRemoteConnectInf(out String saddress, out Int32 sport);
-                        Console.WriteLine($"New Client Connected:{saddress}:{sport}");
-                        session.MessageHandler += OnNewMessage ?? null;
-                        OnNewClient?.Invoke(session);
-                    }
+                    case NetIncomingMessageType.Data:
+                        var data = msg.Data;
+                        var message = SerializeTools.Deserialize<GameMessage>(data);
+                        Console.WriteLine(message.ClientId + "-" + message.Content + "-" + (Int32)message.MsgCode);
+                        break;
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
-            });
-            this._listenThread.Start();
+            }
+
+            p.Recycle(msg);
         }
 
-        public void Send(GameMessage msg, Int32 id)
+        public void Start()
         {
-            if (id == -1)
+            this._server.Start();
+        }
+
+        public GameMessage CreateGameMessage<T>() where T : GameMessage, new()
+        {
+            T t = new T();
+            t.ClientId = this._server.UniqueIdentifier;
+            return t;
+        }
+
+        public void ResponseDiscovery(IPEndPoint recipient)
+        {
+            NetOutgoingMessage response = this._server.CreateMessage();
+            response.Write(NetworkSetting.ServerName);
+            response.Encrypt(this._algo);
+
+            this._server.SendDiscoveryResponse(response, recipient);
+        }
+
+        /// <summary>
+        /// Send Message To Client
+        /// </summary>
+        /// <param name="msg">GameMessage</param>
+        /// <param name="client">Client we want to send. Send to all connected client if it's null</param>
+        public void SendMessage(GameMessage msg, NetConnection client = null)
+        {
+            NetOutgoingMessage om = this._server.CreateMessage();
+
+            var b = SerializeTools.Serialize(msg);
+            om.Write(b);
+            om.Encrypt(this._algo);
+
+            if (client is null)
             {
-                foreach (NetworkClientSession s in this._sessions)
+                this._server.Connections.ForEach((c) =>
                 {
-                    if (s != null)
-                    {
-                        s.Send(msg);
-                    }
-                }
+                    this._server.SendMessage(om, c, NetDeliveryMethod.ReliableOrdered);
+                });
             }
             else
             {
-                foreach (NetworkClientSession s in this._sessions)
-                {
-                    if (s != null && s.Id == id)
-                    {
-                        s.Send(msg);
-                    }
-                }
+                this._server.SendMessage(om, client, NetDeliveryMethod.ReliableOrdered);
             }
         }
 
-        public void Shutdown(Boolean sendShutdownMsg)
+        public void Shutdown(String bye = null)
         {
-            if (sendShutdownMsg)
-            {
-                Send(new ServerShutdownMessage(), -1);
-            }
-
-            this._listener.Stop();
-            this._threadAbort = true;
+            this._server.Shutdown(bye);
         }
     }
 }

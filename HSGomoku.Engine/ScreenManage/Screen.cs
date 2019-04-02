@@ -14,7 +14,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace HSGomoku.Engine.ScreenManage
 {
-    internal class Screen
+    internal abstract class Screen
     {
         public Game Game { get; private set; }
 

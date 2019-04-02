@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using HSGomoku.Engine.Screens;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -39,15 +41,14 @@ namespace HSGomoku.Engine.Components
 
         #endregion define
 
+        public Int32 _chessNumber;
+
         //private readonly Int32[][] _map = new Int32[crossCount][];
         private readonly Dictionary<Vector2, ChessButton> _buttonMap = new Dictionary<Vector2, ChessButton>();
 
-        //public delegate void winDele(PlayerState p);
-        public event Action<PlayerState> WinningEvent;
-        public event EventHandler DrawEvent;
-        public Int32 _chessNumber;
+        public IGameScreen GameScreen { get; private set; }
 
-        public GameBoard(ContentManager content)
+        public GameBoard(ContentManager content, IGameScreen gameScreen)
         {
             for (Int32 x = 0; x < crossCount; ++x)
             {
@@ -67,6 +68,7 @@ namespace HSGomoku.Engine.Components
             }
             CurrentPlayerState = PlayerState.Black;
             this._chessNumber = 0;
+            GameScreen = gameScreen;
         }
 
         public void Reset()
@@ -92,57 +94,6 @@ namespace HSGomoku.Engine.Components
             foreach (var button in this._buttonMap)
             {
                 button.Value.Draw(spriteBatch, gameTime);
-            }
-        }
-
-        public void PlaceChess(Int32 x, Int32 y)
-        {
-            if (CurrentPlayerState == PlayerState.None)
-            {
-                return;
-            }
-            if (!CanPlace(x, y))
-            {
-                return;
-            }
-            var chessButton = GetChessButton(x, y);
-            if (chessButton == null)
-            {
-                return;
-            }
-
-            chessButton.HasChess = true;
-            LastChessPosition = chessButton.BoardPosition;
-            if (CurrentPlayerState == PlayerState.White)
-            {
-                chessButton.IsBlack = false;
-            }
-            else if (CurrentPlayerState == PlayerState.Black)
-            {
-                chessButton.IsBlack = true;
-            }
-            this._chessNumber++;
-
-            // 检测是否有玩家胜利
-            var ctype = chessButton.IsBlack ? ChessType.Black : ChessType.White;
-
-            var linkCount = CheckLink(x, y, ctype);
-
-            if (linkCount >= winChessCount)
-            {
-                WinningEvent?.Invoke(CurrentPlayerState);
-            }
-            else
-            {
-                // 检测是否平局
-                if (this._chessNumber == crossCount * crossCount)
-                {
-                    DrawEvent?.Invoke(this, new EventArgs());
-                }
-                else
-                {
-                    CurrentPlayerState = CurrentPlayerState == PlayerState.Black ? PlayerState.White : PlayerState.Black;
-                }
             }
         }
 

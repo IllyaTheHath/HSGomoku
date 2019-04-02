@@ -55,7 +55,8 @@ namespace HSGomoku.Engine
             // 屏幕管理
             ScreenManager.AddScreen(new SplashScreen(this));
             ScreenManager.AddScreen(new MenuScreen(this));
-            ScreenManager.AddScreen(new GameScreen(this));
+            ScreenManager.AddScreen(new SingleGameScreen(this));
+            ScreenManager.AddScreen(new MultiGameScreen(this));
             ScreenManager.AddScreen(new SettingScreen(this));
             ScreenManager.AddScreen(new HelpScreen(this));
 
@@ -107,6 +108,15 @@ namespace HSGomoku.Engine
             this._fpsCounter.Draw(this._spriteBatch);
 
             base.Draw(gameTime);
+        }
+
+        protected override void Dispose(Boolean disposing)
+        {
+            base.Dispose(disposing);
+            for (Int32 i = 0; i < ScreenManager.GetScreenNumber(); i++)
+            {
+                ScreenManager.GetScreen(i)?.Shutdown();
+            }
         }
     }
 }

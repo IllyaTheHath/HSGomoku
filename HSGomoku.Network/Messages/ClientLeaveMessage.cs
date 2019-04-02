@@ -1,9 +1,9 @@
-﻿using ProtoBuf;
+﻿using System;
 
 namespace HSGomoku.Network.Messages
 {
-    [ProtoContract]
-    public class ClientLeaveMessage : GameMessage
+    [Serializable]
+    public sealed class ClientLeaveMessage : GameMessage
     {
         public ClientLeaveMessage()
         {

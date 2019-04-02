@@ -51,7 +51,8 @@ namespace HSGomoku.Engine.Components
 
         private void ChessButton_Click(Object sender, EventArgs e)
         {
-            this.gameBoard.PlaceChess((Int32)BoardPosition.X, (Int32)BoardPosition.Y);
+            this.gameBoard.GameScreen.PlaceChess((Int32)BoardPosition.X, (Int32)BoardPosition.Y);
+            //this.gameBoard.PlaceChess((Int32)BoardPosition.X, (Int32)BoardPosition.Y);
             //if (CurrentPlayerState == PlayerState.None)
             //{
             //    return;

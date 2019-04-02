@@ -89,11 +89,15 @@
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Network\Client.cs" />
     <Compile Include="Components\Button.cs" />
     <Compile Include="Components\ChessButton.cs" />
     <Compile Include="Components\ClickableControl.cs" />
@@ -104,8 +108,10 @@
     <Compile Include="Model\AI.cs" />
     <Compile Include="ScreenManage\Screen.cs" />
     <Compile Include="ScreenManage\ScreenManager.cs" />
-    <Compile Include="Screens\GameScreen.cs" />
+    <Compile Include="Screens\IGameScreen.cs" />
+    <Compile Include="Screens\SingleGameScreen.cs" />
     <Compile Include="Screens\HelpScreen.cs" />
+    <Compile Include="Screens\MultiGameScreen.cs" />
     <Compile Include="Screens\SettingScreen.cs" />
     <Compile Include="Screens\SplashScreen.cs" />
     <Compile Include="Screens\MenuScreen.cs" />
@@ -123,7 +129,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HSGomoku.Network\HSGomoku.Network.csproj">
-      <Project>{bab7d273-a64c-4c00-86bd-c3bdb70c3e5c}</Project>
+      <Project>{8244d654-4819-4e0e-8e2c-a0575e73be0e}</Project>
       <Name>HSGomoku.Network</Name>
     </ProjectReference>
     <ProjectReference Include="..\SpriteFontX\SpriteFontX.csproj">

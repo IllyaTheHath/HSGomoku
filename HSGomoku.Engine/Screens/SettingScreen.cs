@@ -1,15 +1,13 @@
 ﻿using System;
 
 using HSGomoku.Engine.Components;
+using HSGomoku.Engine.ScreenManage;
 using HSGomoku.Engine.Utilities;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using static HSGomoku.Engine.Utilities.Statistics;
-
-using Screen = HSGomoku.Engine.ScreenManage.Screen;
-using ScreenManager = HSGomoku.Engine.ScreenManage.ScreenManager;
 
 namespace HSGomoku.Engine.Screens
 {
@@ -105,18 +103,11 @@ namespace HSGomoku.Engine.Screens
             //    ToggleFullScreen();
             //}
 
-            if (this.btnRes != null)
-            {
-                this.btnRes.Update(gameTime);
-            }
-            if (this.btnFrame != null)
-            {
-                this.btnFrame.Update(gameTime);
-            }
-            if (this.btnBack != null)
-            {
-                this.btnBack.Update(gameTime);
-            }
+            this.btnRes?.Update(gameTime);
+
+            this.btnFrame?.Update(gameTime);
+
+            this.btnBack?.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -133,18 +124,12 @@ namespace HSGomoku.Engine.Screens
                                 RasterizerState.CullNone,
                                 null,
                                 Resolution.GetTransformationMatrix());
-            if (this.btnRes != null)
-            {
-                this.btnRes.Draw(this._spriteBatch, gameTime);
-            }
-            if (this.btnFrame != null)
-            {
-                this.btnFrame.Draw(this._spriteBatch, gameTime);
-            }
-            if (this.btnBack != null)
-            {
-                this.btnBack.Draw(this._spriteBatch, gameTime);
-            }
+
+            this.btnRes?.Draw(this._spriteBatch, gameTime);
+
+            this.btnFrame?.Draw(this._spriteBatch, gameTime);
+
+            this.btnBack?.Draw(this._spriteBatch, gameTime);
 
             this._spriteBatch.End();
 

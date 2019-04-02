@@ -9,24 +9,24 @@ namespace HSGomoku.Server
     {
         private static void Main(String[] args)
         {
-            String address = "127.0.0.1";
-            Int32 port = 13459;
-            NetworkServer server = new NetworkServer();
-            server.OnNewClient += (session) =>
+            NetworkServer server2 = new NetworkServer();
+            server2.Start();
+            GameMessage msg2;
+
+            while (true)
             {
-                session.GetRemoteConnectInf(out String saddress, out Int32 sport);
-                Console.WriteLine("Send Hello Message To Client");
-                session.Send(new GameMessage() { MsgCode = MsgCode.Hello, Content = $"Hello, Friend From {saddress}:{sport}" });
-            };
-            server.OnNewMessage += (message) =>
-            {
-                Console.WriteLine($"Recieve Message From Client:msgCode={message.MsgCode},content={message.Content}");
-            };
-            server.StartListen(address, port);
-            Console.ReadLine();
-            server.Send(new GameMessage() { Content = "server" }, -1);
-            Console.ReadLine();
-            server.Shutdown(true);
+                var line = Console.ReadLine();
+                if (line == "send")
+                {
+                    msg2 = server2.CreateGameMessage<HelloMessage>();
+                    server2.SendMessage(msg2);
+                }
+                if (line == "exit")
+                {
+                    break;
+                }
+            }
+            server2.Shutdown();
         }
     }
 }

@@ -8,7 +8,7 @@ using System.Threading;
 using HSGomoku.Network.Messages;
 using HSGomoku.Network.Utils;
 
-namespace HSGomoku.Network
+namespace HSGomoku.Network.Old
 {
     public class NetworkClientSession
     {
@@ -56,7 +56,7 @@ namespace HSGomoku.Network
 
                         Int32 length = this.reader.ReadInt32();
                         var data = this.reader.ReadBytes(length);
-                        var msg = ProtoBufTools.Deserialize<GameMessage>(data);
+                        var msg = SerializeTools.Deserialize<GameMessage>(data);
                         MessageHandler(msg);
                     }
                 }
@@ -82,7 +82,7 @@ namespace HSGomoku.Network
                 return;
             }
 
-            var data = ProtoBufTools.Serialize(msg);
+            var data = SerializeTools.Serialize(msg);
             if (data.Length == 0)
             {
                 return;

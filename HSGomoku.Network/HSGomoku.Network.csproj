@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,7 +12,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="protobuf-net" Version="2.4.0" />
+    <Reference Include="Lidgren.Network">
+      <HintPath>..\libs\Lidgren\Lidgren.Network.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

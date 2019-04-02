@@ -1,100 +1,97 @@
 ﻿using System;
-using System.IO;
 using System.Net;
-using System.Net.Sockets;
-
-using System.Threading;
 
 using HSGomoku.Network.Messages;
 using HSGomoku.Network.Utils;
+
+using Lidgren.Network;
 
 namespace HSGomoku.Network
 {
     public class NetworkClient
     {
-        private readonly Socket clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        private BinaryReader reader;
-        private BinaryWriter writer;
+        private readonly NetPeerConfiguration _config;
+        private readonly NetClient _client;
+        private readonly NetEncryption _algo;
 
-        public event Action<GameMessage> MessageHandler;
-
-        private Thread _recieveThread;
-        private Boolean _threadAbort;
+        public NetClient NetClient { get { return this._client; } }
 
         public NetworkClient()
         {
-            this._threadAbort = false;
+            this._config = new NetPeerConfiguration(NetworkSetting.AppIdentifier);
+            //this._config.LocalAddress = IPAddress.Parse(NetworkSetting.IpAddress);
+
+            this._config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
+
+            this._client = new NetClient(this._config);
+
+            this._algo = new NetXtea(this._client, NetworkSetting.Encryptionkey);
         }
 
-        public Boolean Connected
+        public void Start()
         {
-            get
-            {
-                return this.clientSocket.Connected;
-            }
+            this._client.Start();
+            //this._client.DiscoverLocalPeers(NetworkSetting.Port);
         }
 
-        public void Connect(String address, Int32 port)
+        public void DiscoverPeers()
         {
-            IPAddress ip = IPAddress.Parse(address);
+            this._client.DiscoverKnownPeer(NetworkSetting.IpAddress, NetworkSetting.Port);
+        }
 
-            this.clientSocket.Connect(new IPEndPoint(ip, port));
+        public void Connect()
+        {
+            NetOutgoingMessage approval = this._client.CreateMessage();
+            approval.Write(NetworkSetting.Encryptionkey);
+            this._client.Connect(NetworkSetting.IpAddress, NetworkSetting.Port, approval);
+        }
 
-            this.reader = new BinaryReader(new NetworkStream(this.clientSocket));
-            this.writer = new BinaryWriter(new NetworkStream(this.clientSocket));
+        public void Connect(IPEndPoint remoteEndPoint)
+        {
+            NetOutgoingMessage approval = this._client.CreateMessage();
+            approval.Write(NetworkSetting.Encryptionkey);
+            this._client.Connect(remoteEndPoint, approval);
+        }
 
-            this._recieveThread = new Thread((o) =>
+        public GameMessage CreateGameMessage<T>() where T : GameMessage, new()
+        {
+            T t = new T();
+            t.ClientId = this._client.UniqueIdentifier;
+            return t;
+        }
+
+        public void ResponseDiscovery(IPEndPoint recipient)
+        {
+            NetOutgoingMessage response = this._client.CreateMessage();
+            response.Write(NetworkSetting.ServerName);
+            response.Encrypt(this._algo);
+
+            this._client.SendDiscoveryResponse(response, recipient);
+        }
+
+        /// <summary>
+        /// Send Message To Client
+        /// </summary>
+        /// <param name="msg">GameMessage</param>
+        /// <param name="client">Client we want to send. Send to all connected client if it's null</param>
+        public void SendMessage(GameMessage msg)
+        {
+            NetOutgoingMessage om = this._client.CreateMessage();
+
+            var b = SerializeTools.Serialize(msg);
+            om.Write(b);
+            om.Encrypt(this._algo);
+
+            this._client.Connections.ForEach((c) =>
             {
-                try
-                {
-                    while (true)
-                    {
-                        if (this._threadAbort)
-                        {
-                            break;
-                        }
-
-                        Int32 length = this.reader.ReadInt32();
-                        var data = this.reader.ReadBytes(length);
-                        var msg = ProtoBufTools.Deserialize<GameMessage>(data);
-                        MessageHandler?.Invoke(msg);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
+                this._client.SendMessage(om, c, NetDeliveryMethod.ReliableOrdered);
             });
-            this._recieveThread.Start();
-            Send(new ClientJoinMessage());
         }
 
-        public void Send(GameMessage msg)
+        public void Shutdown(String bye = null)
         {
-            if (msg == null)
-            {
-                return;
-            }
-
-            var data = ProtoBufTools.Serialize(msg);
-            if (data.Length == 0)
-            {
-                return;
-            }
-
-            this.writer.Write(data.Length);
-            this.writer.Write(data);
-        }
-
-        public void Close(Boolean sendLeaveMsg)
-        {
-            if (sendLeaveMsg)
-            {
-                Send(new ClientLeaveMessage());
-            }
-
-            this.clientSocket.Close();
-            this._threadAbort = true;
+            this._client.Disconnect(bye);
+            this._client.Shutdown(bye);
         }
     }
 }
