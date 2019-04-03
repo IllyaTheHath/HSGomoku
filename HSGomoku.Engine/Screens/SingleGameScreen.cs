@@ -146,7 +146,7 @@ namespace HSGomoku.Engine.Screens
         private void RaiseSurrenderEvent(PlayerState p)
         {
             CurrentPlayerState = PlayerState.None;
-            var result = SDL2.SDL.SDL_ShowSimpleMessageBox(
+            SDL2.SDL.SDL_ShowSimpleMessageBox(
                             SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
                             "游戏结束",
                             $"{(p == PlayerState.Black ? "黑棋" : "白旗")}认输了",
@@ -191,7 +191,7 @@ namespace HSGomoku.Engine.Screens
             CurrentPlayerState = PlayerState.Black;
         }
 
-        public void PlaceChess(Int32 x, Int32 y)
+        public void PlaceChess(Int32 x, Int32 y, Boolean checkWin = true)
         {
             if (CurrentPlayerState == PlayerState.None)
             {
@@ -220,24 +220,27 @@ namespace HSGomoku.Engine.Screens
             this._gameboard._chessNumber++;
 
             // 检测是否有玩家胜利
-            var ctype = chessButton.IsBlack ? ChessType.Black : ChessType.White;
-
-            var linkCount = this._gameboard.CheckLink(x, y, ctype);
-
-            if (linkCount >= GameBoard.winChessCount)
+            if (checkWin)
             {
-                RaiseWinningEvent(CurrentPlayerState);
-            }
-            else
-            {
-                // 检测是否平局
-                if (this._gameboard._chessNumber == GameBoard.crossCount * GameBoard.crossCount)
+                var ctype = chessButton.IsBlack ? ChessType.Black : ChessType.White;
+
+                var linkCount = this._gameboard.CheckLink(x, y, ctype);
+
+                if (linkCount >= GameBoard.winChessCount)
                 {
-                    RaiseDrawEvent();
+                    RaiseWinningEvent(CurrentPlayerState);
                 }
                 else
                 {
-                    RaisePlaceChessEvent();
+                    // 检测是否平局
+                    if (this._gameboard._chessNumber == GameBoard.crossCount * GameBoard.crossCount)
+                    {
+                        RaiseDrawEvent();
+                    }
+                    else
+                    {
+                        RaisePlaceChessEvent();
+                    }
                 }
             }
         }

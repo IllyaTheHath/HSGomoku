@@ -90,7 +90,7 @@ namespace HSGomoku.Engine.Screens
 
             this._gameboard = null;
 
-            this._client.Shutdown();
+            this._client?.Shutdown();
 
             base.Shutdown();
         }
@@ -129,7 +129,7 @@ namespace HSGomoku.Engine.Screens
                         NetConnectionStatus status = (NetConnectionStatus)msg.ReadByte();
                         if (status == NetConnectionStatus.Connected)
                         {
-                            Console.WriteLine(" connected to" + msg.SenderConnection.RemoteUniqueIdentifier);
+                            Console.WriteLine("connected to" + msg.SenderConnection.RemoteUniqueIdentifier);
                         }
                         break;
 
@@ -179,12 +179,12 @@ namespace HSGomoku.Engine.Screens
             base.Draw(gameTime);
         }
 
-        private void OnMessage(GameMessage e)
+        private void OnMessage(GameMessage message)
         {
             SDL2.SDL.SDL_ShowSimpleMessageBox(
                             SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
                             "OnMessage",
-                            e.ClientId + "-" + e.MsgCode + "-" + e.Content,
+                            message.ClientId + "-" + message.MsgCode + "-" + message.Content,
                             Game.Window.Handle);
         }
 
@@ -242,7 +242,7 @@ namespace HSGomoku.Engine.Screens
             CurrentPlayerState = PlayerState.Black;
         }
 
-        public void PlaceChess(Int32 x, Int32 y)
+        public void PlaceChess(Int32 x, Int32 y, Boolean checkWin = true)
         {
             if (CurrentPlayerState == PlayerState.None)
             {
@@ -271,25 +271,32 @@ namespace HSGomoku.Engine.Screens
             this._gameboard._chessNumber++;
 
             // 检测是否有玩家胜利
-            var ctype = chessButton.IsBlack ? ChessType.Black : ChessType.White;
-
-            var linkCount = this._gameboard.CheckLink(x, y, ctype);
-
-            if (linkCount >= GameBoard.winChessCount)
+            if (checkWin)
             {
-                RaiseWinningEvent(CurrentPlayerState);
-            }
-            else
-            {
-                // 检测是否平局
-                if (this._gameboard._chessNumber == GameBoard.crossCount * GameBoard.crossCount)
+                var ctype = chessButton.IsBlack ? ChessType.Black : ChessType.White;
+
+                var linkCount = this._gameboard.CheckLink(x, y, ctype);
+
+                if (linkCount >= GameBoard.winChessCount)
                 {
-                    RaiseDrawEvent();
+                    RaiseWinningEvent(CurrentPlayerState);
                 }
                 else
                 {
-                    RaisePlaceChessEvent();
+                    // 检测是否平局
+                    if (this._gameboard._chessNumber == GameBoard.crossCount * GameBoard.crossCount)
+                    {
+                        RaiseDrawEvent();
+                    }
+                    else
+                    {
+                        RaisePlaceChessEvent();
+                    }
                 }
+            }
+            else
+            {
+                CurrentPlayerState = CurrentPlayerState == PlayerState.Black ? PlayerState.White : PlayerState.Black;
             }
         }
     }

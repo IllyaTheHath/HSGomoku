@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace HSGomoku.Network.Messages
 {
@@ -13,7 +14,6 @@ namespace HSGomoku.Network.Messages
 
         GameStart = 20,
         GameEnd = 21,
-        GameRestart = 22,
 
         PlayerPlaceChess = 30,
         PlayerSurrender = 31,
@@ -31,5 +31,7 @@ namespace HSGomoku.Network.Messages
         public String Content { get; set; } = String.Empty;
 
         public Int64 ClientId { get; set; }
+
+        public Dictionary<String, Object> ExtraData { get; set; }
     }
 }

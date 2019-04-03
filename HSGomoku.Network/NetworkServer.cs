@@ -14,6 +14,9 @@ namespace HSGomoku.Network
         private readonly NetPeerConfiguration _config;
         private readonly NetServer _server;
         private readonly NetEncryption _algo;
+        private readonly Int32 _connectedClient;
+
+        public event Action<GameMessage> OnGameMessage;
 
         public NetServer NetServer { get { return this._server; } }
 
@@ -32,6 +35,7 @@ namespace HSGomoku.Network
             this._server.RegisterReceivedCallback(new SendOrPostCallback(OnMessage));
 
             this._algo = new NetXtea(this._server, NetworkSetting.Encryptionkey);
+            this._connectedClient = 0;
         }
 
         public void OnMessage(Object peer)
@@ -51,7 +55,8 @@ namespace HSGomoku.Network
 
                     case NetIncomingMessageType.ConnectionApproval:
                         String s = msg.ReadString();
-                        if (s == NetworkSetting.Encryptionkey)
+                        if (s == NetworkSetting.Encryptionkey &&
+                            this._connectedClient <= NetworkSetting.MaxConnectClient)
                         {
                             msg.SenderConnection.Approve();
                         }
@@ -84,6 +89,7 @@ namespace HSGomoku.Network
                         var data = msg.Data;
                         var message = SerializeTools.Deserialize<GameMessage>(data);
                         Console.WriteLine(message.ClientId + "-" + message.Content + "-" + (Int32)message.MsgCode);
+                        OnGameMessage?.Invoke(message);
                         break;
                 }
             }
@@ -96,7 +102,7 @@ namespace HSGomoku.Network
             this._server.Start();
         }
 
-        public GameMessage CreateGameMessage<T>() where T : GameMessage, new()
+        public T CreateGameMessage<T>() where T : GameMessage, new()
         {
             T t = new T();
             t.ClientId = this._server.UniqueIdentifier;
@@ -112,6 +118,11 @@ namespace HSGomoku.Network
             this._server.SendDiscoveryResponse(response, recipient);
         }
 
+        public NetConnection GetClient(Int64 clientId)
+        {
+            return this._server.Connections.Find(con => con.RemoteUniqueIdentifier == clientId);
+        }
+
         /// <summary>
         /// Send Message To Client
         /// </summary>
@@ -125,27 +136,14 @@ namespace HSGomoku.Network
             om.Write(b);
             om.Encrypt(this._algo);
 
-            if (client is null)
-            {
-                this._server.Connections.ForEach((c) =>
-                {
-                    this._server.SendMessage(om, c, NetDeliveryMethod.ReliableOrdered);
-                });
-            }
-            else
-            {
-                this._server.SendMessage(om, client, NetDeliveryMethod.ReliableOrdered);
-            }
+            this._server.SendMessage(om, client, NetDeliveryMethod.ReliableOrdered);
         }
 
         public void Shutdown(String bye = null)
         {
+            var msg = CreateGameMessage<ServerShutdownMessage>();
+            SendMessage(msg);
             this._server.Shutdown(bye);
-        }
-
-        public void DecryptMessage(NetIncomingMessage msg)
-        {
-            msg.Decrypt(this._algo);
         }
     }
 }
