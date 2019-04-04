@@ -82,5 +82,10 @@ namespace HSGomoku.Engine.Components
         {
             base.Draw(spriteBatch, gameTime);
         }
+
+        public void InvokeClick()
+        {
+            OnClick();
+        }
     }
 }

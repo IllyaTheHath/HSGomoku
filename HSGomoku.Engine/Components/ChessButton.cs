@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
+using static HSGomoku.Engine.Utilities.Statistics;
+
 namespace HSGomoku.Engine.Components
 {
     internal class ChessButton : ClickableControl
@@ -49,31 +51,14 @@ namespace HSGomoku.Engine.Components
             }
         }
 
-        private void ChessButton_Click(Object sender, EventArgs e)
+        private void ChessButton_Click()
         {
-            this.gameBoard.GameScreen.PlaceChess((Int32)BoardPosition.X, (Int32)BoardPosition.Y);
-            //this.gameBoard.PlaceChess((Int32)BoardPosition.X, (Int32)BoardPosition.Y);
-            //if (CurrentPlayerState == PlayerState.None)
-            //{
-            //    return;
-            //}
-            //if (HasChess)
-            //{
-            //    return;
-            //}
+            if (CurrentPlayerState != PlayerType)
+            {
+                return;
+            }
 
-            //HasChess = true;
-            //LastChessPosition = BoardPosition;
-            //if (CurrentPlayerState == PlayerState.White)
-            //{
-            //    IsBlack = false;
-            //    CurrentPlayerState = PlayerState.Black;
-            //}
-            //else if (CurrentPlayerState == PlayerState.Black)
-            //{
-            //    IsBlack = true;
-            //    CurrentPlayerState = PlayerState.White;
-            //}
+            this.gameBoard.GameScreen.PlaceChess((Int32)BoardPosition.X, (Int32)BoardPosition.Y);
         }
     }
 }

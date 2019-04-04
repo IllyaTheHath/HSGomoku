@@ -27,7 +27,7 @@ namespace HSGomoku.Engine.Screens
                 this._content.Load<Texture2D>("img\\button_res"),
                 new Vector2(400, 400),
                 new Vector2(144, 72));
-            this._btnRes.Click += (s, e) =>
+            this._btnRes.Click += () =>
             {
                 ChangeResolution();
             };
@@ -35,7 +35,7 @@ namespace HSGomoku.Engine.Screens
                 this._content.Load<Texture2D>("img\\button_framerate"),
                 new Vector2(400, 600),
                 new Vector2(144, 72));
-            this._btnFrame.Click += (s, e) =>
+            this._btnFrame.Click += () =>
             {
                 ChangeFrameRate();
             };
@@ -43,7 +43,7 @@ namespace HSGomoku.Engine.Screens
                 this._content.Load<Texture2D>("img\\button_back"),
                 new Vector2(400, 800),
                 new Vector2(144, 72));
-            this._btnBack.Click += (s, e) =>
+            this._btnBack.Click += () =>
             {
                 ScreenManager.GoBack();
             };

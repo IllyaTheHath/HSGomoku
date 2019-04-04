@@ -14,7 +14,6 @@ namespace HSGomoku.Network
         private readonly NetPeerConfiguration _config;
         private readonly NetServer _server;
         private readonly NetEncryption _algo;
-        private readonly Int32 _connectedClient;
 
         public event Action<GameMessage> OnGameMessage;
 
@@ -35,7 +34,6 @@ namespace HSGomoku.Network
             this._server.RegisterReceivedCallback(new SendOrPostCallback(OnMessage));
 
             this._algo = new NetXtea(this._server, NetworkSetting.Encryptionkey);
-            this._connectedClient = 0;
         }
 
         public void OnMessage(Object peer)
@@ -55,8 +53,7 @@ namespace HSGomoku.Network
 
                     case NetIncomingMessageType.ConnectionApproval:
                         String s = msg.ReadString();
-                        if (s == NetworkSetting.Encryptionkey &&
-                            this._connectedClient <= NetworkSetting.MaxConnectClient)
+                        if (s == NetworkSetting.Encryptionkey)
                         {
                             msg.SenderConnection.Approve();
                         }
@@ -77,19 +74,30 @@ namespace HSGomoku.Network
                         NetConnectionStatus status = (NetConnectionStatus)msg.ReadByte();
                         if (status == NetConnectionStatus.Connected)
                         {
-                            Console.WriteLine(msg.SenderConnection.RemoteUniqueIdentifier + " connected!");
+                            Console.WriteLine(NetUtility.ToHexString(msg.SenderConnection.RemoteUniqueIdentifier) + " connected!");
                         }
                         else if (status == NetConnectionStatus.Disconnected)
                         {
-                            Console.WriteLine(msg.SenderConnection.RemoteUniqueIdentifier + " disconnected!");
+                            Console.WriteLine(NetUtility.ToHexString(msg.SenderConnection.RemoteUniqueIdentifier) + " disconnected!");
                         }
                         break;
 
                     case NetIncomingMessageType.Data:
-                        var data = msg.Data;
-                        var message = SerializeTools.Deserialize<GameMessage>(data);
-                        Console.WriteLine(message.ClientId + "-" + message.Content + "-" + (Int32)message.MsgCode);
-                        OnGameMessage?.Invoke(message);
+                        try
+                        {
+                            var data = msg.Data;
+                            var message = SerializeTools.Deserialize<GameMessage>(data);
+                            Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                            Console.WriteLine($"Receive Message From {NetUtility.ToHexString(message.ClientId)}::MsgCode:{(Int32)message.MsgCode},Content:{message.Content}");
+                            Console.ResetColor();
+                            OnGameMessage?.Invoke(message);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine(ex);
+                            Console.ResetColor();
+                        }
                         break;
                 }
             }
@@ -136,6 +144,10 @@ namespace HSGomoku.Network
             om.Write(b);
             om.Encrypt(this._algo);
 
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            var clientId = client is null ? "All" : NetUtility.ToHexString(client.RemoteUniqueIdentifier);
+            Console.WriteLine($"  Send  Message  To  {clientId}::MsgCode:{(Int32)msg.MsgCode},Content:{msg.Content}");
+            Console.ResetColor();
             this._server.SendMessage(om, client, NetDeliveryMethod.ReliableOrdered);
         }
 

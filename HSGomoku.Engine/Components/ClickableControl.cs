@@ -9,7 +9,7 @@ namespace HSGomoku.Engine.Components
 {
     internal class ClickableControl : ControlBase
     {
-        public event EventHandler Click;
+        public event Action Click;
 
         public ClickableControl() : base()
         {
@@ -24,19 +24,16 @@ namespace HSGomoku.Engine.Components
         {
             var mouse = Mouse.GetState();
             // 单击事件
-            if (IsMouseOver(mouse) && Input.MouseLeftClicked())
+            if (IsMouseOver(mouse) && Input.MouseLeftClicked() && this._enabled)
             {
-                OnClick(new EventArgs());
+                OnClick();
             }
             base.Update(gameTime);
         }
 
-        protected void OnClick(EventArgs e)
+        protected void OnClick()
         {
-            if (Click != null)
-            {
-                Click.Invoke(this, e);
-            }
+            Click?.Invoke();
         }
     }
 }

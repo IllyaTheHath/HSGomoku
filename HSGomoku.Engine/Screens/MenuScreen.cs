@@ -46,7 +46,7 @@ namespace HSGomoku.Engine.Screens
                 this._content.Load<Texture2D>("img\\menubutton_exit"),
                 new Vector2(280, 1200),
                 new Vector2(300, 150));
-            this._btnExit.Click += (s, e) =>
+            this._btnExit.Click += () =>
             {
                 Game.Exit();
             };

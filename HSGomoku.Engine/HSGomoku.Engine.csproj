@@ -142,8 +142,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\app.manifest" />
+    <Compile Include="Screens\MultiGameScreen.OnMessage.cs" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <MonoGamePlatform>Windows</MonoGamePlatform>

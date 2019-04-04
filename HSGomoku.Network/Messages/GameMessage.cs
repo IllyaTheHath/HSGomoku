@@ -32,6 +32,6 @@ namespace HSGomoku.Network.Messages
 
         public Int64 ClientId { get; set; }
 
-        public Dictionary<String, Object> ExtraData { get; set; }
+        public Dictionary<String, Object> ExtraData { get; set; } = new Dictionary<String, Object>();
     }
 }

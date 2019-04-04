@@ -15,13 +15,13 @@ namespace HSGomoku.Engine.UI
     {
         private SpriteFontX _fontX;
         private SpriteFontX _fontXTitle;
-        private Texture2D _pixel;
+        //private Texture2D _pixel;
 
         public void Load(ContentManager content, GraphicsDeviceManager graphics)
         {
             this._fontX = new SpriteFontX(FNAFont.Font16, graphics);
             this._fontXTitle = new SpriteFontX(FNAFont.Font20, graphics);
-            this._pixel = content.Load<Texture2D>("img\\pixel");
+            //this._pixel = content.Load<Texture2D>("img\\pixel");
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -52,7 +52,20 @@ namespace HSGomoku.Engine.UI
             spriteBatch.DrawStringX(this._fontX, "已走x步", new Vector2(1500, 550), Color.Black);
 
             // 对局信息
-            spriteBatch.DrawStringX(this._fontX, "您是：玩家1", new Vector2(1470, 750), Color.Black);
+            String playerType = String.Empty;
+            if (PlayerType == PlayerState.None)
+            {
+                playerType = "无";
+            }
+            if (PlayerType == PlayerState.Black)
+            {
+                playerType = "玩家1";
+            }
+            if (PlayerType == PlayerState.White)
+            {
+                playerType = "玩家2";
+            }
+            spriteBatch.DrawStringX(this._fontX, $"您是：{playerType}", new Vector2(1470, 750), Color.Black);
 
             String currentPlayer = String.Empty;
             if (CurrentPlayerState == PlayerState.None)

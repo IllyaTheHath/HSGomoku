@@ -34,7 +34,7 @@ namespace HSGomoku.Engine.Components
             this.Click += GotoScreen;
         }
 
-        private void GotoScreen(Object sender, EventArgs e)
+        private void GotoScreen()
         {
             ScreenManage.ScreenManager.GotoScreen(this._screenName);
         }

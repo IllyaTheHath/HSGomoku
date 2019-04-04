@@ -35,7 +35,7 @@ namespace HSGomoku.Engine.Screens
                 this._content.Load<Texture2D>("img\\button_surrender"),
                 new Vector2(1440, 1290),
                 new Vector2(144, 72));
-            this._btnSurrender.Click += (s, e) =>
+            this._btnSurrender.Click += () =>
             {
                 this._surrender = true;
             };
@@ -43,7 +43,7 @@ namespace HSGomoku.Engine.Screens
                 this._content.Load<Texture2D>("img\\button_back"),
                 new Vector2(1726, 1290),
                 new Vector2(144, 72));
-            this._btnBack.Click += (s, e) =>
+            this._btnBack.Click += () =>
             {
                 Reset();
                 ScreenManager.GoBack();
@@ -59,6 +59,7 @@ namespace HSGomoku.Engine.Screens
 
             // AI
             this._ai = new AI();
+            PlayerType = PlayerState.Black;
 
             base.Init();
         }
@@ -83,6 +84,7 @@ namespace HSGomoku.Engine.Screens
 
             this._gameboard = null;
             this._ai = null;
+            PlayerType = PlayerState.None;
 
             base.Shutdown();
         }
@@ -189,6 +191,7 @@ namespace HSGomoku.Engine.Screens
 
             LastChessPosition = new Vector2(-1, -1);
             CurrentPlayerState = PlayerState.Black;
+            PlayerType = PlayerState.Black;
         }
 
         public void PlaceChess(Int32 x, Int32 y, Boolean checkWin = true)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 using HSGomoku.Network;
 using HSGomoku.Network.Messages;
@@ -15,6 +16,10 @@ namespace HSGomoku.Server
 
         private static NetworkServer server;
 
+        private static Boolean _quitRequested = false;
+        private static readonly Object _syncLock = new Object();
+        private static readonly AutoResetEvent _waitHandle = new AutoResetEvent(false);
+
         private static void Main(String[] args)
         {
             connected = new HashSet<Int64>();
@@ -24,20 +29,46 @@ namespace HSGomoku.Server
             server = new NetworkServer();
             server.Start();
             server.OnGameMessage += HandleMessage;
-
-            while (true)
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine($"Server Started at {NetworkSetting.IpAddress}:{NetworkSetting.Port}");
+            Console.ResetColor();
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
+            // start the message pumping thread
+            Thread msgThread = new Thread(MessagePump);
+            msgThread.Start();
+            // read input to detect "quit" command
+            String command = String.Empty;
+            do
             {
-                var line = Console.ReadLine();
-                if (line == "send")
-                {
-                    var msg = server.CreateGameMessage<HelloMessage>();
-                    server.SendMessage(msg);
-                }
-                if (line == "exit")
-                {
-                    break;
-                }
+                command = Console.ReadLine();
+            } while (!"quit".Equals(command, StringComparison.InvariantCultureIgnoreCase));
+            // signal that we want to quit
+            SetQuitRequested();
+            // wait until the message pump says it's done
+            _waitHandle.WaitOne();
+            // perform any additional cleanup, logging or whatever
+        }
+
+        private static void SetQuitRequested()
+        {
+            lock (_syncLock)
+            {
+                _quitRequested = true;
             }
+        }
+
+        private static void MessagePump()
+        {
+            do
+            {
+                // act on messages
+            } while (!_quitRequested);
+            _waitHandle.Set();
+        }
+
+        private static void CurrentDomain_ProcessExit(Object sender, EventArgs e)
+        {
+            Console.WriteLine("exiting...");
             server.Shutdown();
         }
 
@@ -54,7 +85,7 @@ namespace HSGomoku.Server
                     break;
 
                 case MsgCode.ClientMatch:
-                    MatchClients(message.ClientId);
+                    ClientMatch(message.ClientId);
                     break;
 
                 case MsgCode.GameStart:
@@ -63,8 +94,8 @@ namespace HSGomoku.Server
                     break;
 
                 case MsgCode.GameEnd:
-                    // 哪个客户端发来游戏结束消息，说明哪个客户端获得胜利
-                    GameEnd(message.ClientId);
+                    // 哪个客户端发来游戏结束消息，说明哪个客户端获得胜利,或者平局
+                    GameEnd(message);
                     break;
 
                 case MsgCode.PlayerPlaceChess:
@@ -113,12 +144,15 @@ namespace HSGomoku.Server
                 matched.Remove(matchedId);
             }
             connected.Remove(clientId);
-            connected.Remove(matchedId);
-            var msg = server.CreateGameMessage<ClientLeaveMessage>();
-            server.SendMessage(msg, server.GetClient(matchedId));
+            if (matchedId != 0)
+            {
+                connected.Remove(matchedId);
+                var msg = server.CreateGameMessage<ClientLeaveMessage>();
+                server.SendMessage(msg, server.GetClient(matchedId));
+            }
         }
 
-        private static void MatchClients(Int64 clientId)
+        private static void ClientMatch(Int64 clientId)
         {
             lock (matching)
             {
@@ -145,8 +179,9 @@ namespace HSGomoku.Server
             }
         }
 
-        private static void GameEnd(Int64 clientId)
+        private static void GameEnd(GameMessage message)
         {
+            Int64 clientId = message.ClientId;
             Int64 matchedId = 0;
             if (matched.ContainsKey(clientId))
             {
@@ -161,11 +196,23 @@ namespace HSGomoku.Server
             }
             connected.Remove(clientId);
             connected.Remove(matchedId);
+            var draw = (Boolean)message.ExtraData["Draw"];
             var msg = server.CreateGameMessage<GameEndMessage>();
-            msg.ExtraData["Win"] = true;
-            server.SendMessage(msg, server.GetClient(clientId));
-            msg.ExtraData["Win"] = false;
-            server.SendMessage(msg, server.GetClient(matchedId));
+            if (draw)
+            {
+                msg.ExtraData["Draw"] = true;
+                server.SendMessage(msg, server.GetClient(clientId));
+                server.SendMessage(msg, server.GetClient(matchedId));
+            }
+            else
+            {
+                msg.ExtraData["Draw"] = false;
+                // 发送方为胜利者
+                msg.ExtraData["Win"] = true;
+                server.SendMessage(msg, server.GetClient(clientId));
+                msg.ExtraData["Win"] = false;
+                server.SendMessage(msg, server.GetClient(matchedId));
+            }
         }
 
         private static void PlayerPlaceChess(GameMessage message)
@@ -200,9 +247,17 @@ namespace HSGomoku.Server
                 matchedId = matched.First(m => m.Value == clientId).Key;
                 matched.Remove(matchedId);
             }
+            else
+            {
+                // 玩家不在游戏中，直接返回
+                return;
+            }
             connected.Remove(clientId);
             connected.Remove(matchedId);
             var msg = server.CreateGameMessage<PlayerSurrenderMessage>();
+            msg.ExtraData["Win"] = false;
+            server.SendMessage(msg, server.GetClient(clientId));
+            msg.ExtraData["Win"] = true;
             server.SendMessage(msg, server.GetClient(matchedId));
         }
     }

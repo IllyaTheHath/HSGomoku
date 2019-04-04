@@ -82,7 +82,10 @@ namespace HSGomoku.Network
             om.Write(b);
             om.Encrypt(this._algo);
 
-            this._client.SendMessage(om, null, NetDeliveryMethod.ReliableOrdered);
+            if (this._client.ConnectionStatus == NetConnectionStatus.Connected)
+            {
+                this._client.SendMessage(om, this._client.ServerConnection, NetDeliveryMethod.ReliableOrdered);
+            }
         }
 
         public void Shutdown(String bye = null)

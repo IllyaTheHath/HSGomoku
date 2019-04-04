@@ -26,6 +26,8 @@ namespace HSGomoku.Engine.Utilities
 
         public static PlayerState CurrentPlayerState { get; set; } = PlayerState.None;
 
+        public static PlayerState PlayerType { get; set; } = PlayerState.None;
+
         public static Vector2 LastChessPosition { get; set; } = new Vector2(-1, -1);
 
         #endregion Game State

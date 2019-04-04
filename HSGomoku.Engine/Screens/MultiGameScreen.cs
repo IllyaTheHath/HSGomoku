@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Linq;
+using System.Threading;
+using System.Timers;
 
 using HSGomoku.Engine.Components;
 using HSGomoku.Engine.ScreenManage;
@@ -15,19 +18,26 @@ using Microsoft.Xna.Framework.Graphics;
 
 using static HSGomoku.Engine.Utilities.Statistics;
 
+using Timer = System.Timers.Timer;
+
 namespace HSGomoku.Engine.Screens
 {
-    internal class MultiGameScreen : Screen, IGameScreen
+    internal partial class MultiGameScreen : Screen, IGameScreen
     {
         private Texture2D _board;
         private Button _btnSurrender;
         private Button _btnBack;
         private GameHUD _gameHUD;
+        private SpriteFontX _fontX;
 
         private GameBoard _gameboard;
         private NetworkClient _client;
 
-        private Boolean _surrender = false;
+        private Boolean _surrender;
+        private Boolean _connected;
+
+        private Int32 _connectTime;
+        private Timer _connectTimer;
 
         public MultiGameScreen(Game game) : base(game)
         {
@@ -35,11 +45,18 @@ namespace HSGomoku.Engine.Screens
 
         public override void Init()
         {
+            this._surrender = false;
+            this._connected = false;
+            this._connectTime = 0;
+            this._connectTimer = new Timer(100);
+            this._connectTimer.Elapsed += Timer_Elapsed;
+
             this._btnSurrender = new Button(
                 this._content.Load<Texture2D>("img\\button_surrender"),
                 new Vector2(1440, 1290),
                 new Vector2(144, 72));
-            this._btnSurrender.Click += (s, e) =>
+            this._btnSurrender.Enabled = false;
+            this._btnSurrender.Click += () =>
             {
                 this._surrender = true;
             };
@@ -47,7 +64,7 @@ namespace HSGomoku.Engine.Screens
                 this._content.Load<Texture2D>("img\\button_back"),
                 new Vector2(1726, 1290),
                 new Vector2(144, 72));
-            this._btnBack.Click += (s, e) =>
+            this._btnBack.Click += () =>
             {
                 Reset();
                 ScreenManager.GoBack();
@@ -66,8 +83,28 @@ namespace HSGomoku.Engine.Screens
             this._client.Start();
             //this._client.Connect();
             this._client.DiscoverPeers();
+            this._connectTimer.Start();
+            CurrentPlayerState = PlayerState.None;
+            PlayerType = PlayerState.None;
 
             base.Init();
+        }
+
+        private void Timer_Elapsed(Object sender, ElapsedEventArgs e)
+        {
+            this._connectTime += 100;
+            if (this._connectTime > 3000 && !this._connected)
+            {
+                //  连接服务器失败
+                this._connectTimer.Stop();
+                this._connectTime = 0;
+                SDL2.SDL.SDL_ShowSimpleMessageBox(
+                            SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
+                            "连接服务器失败",
+                            "连接服务器失败",
+                            Game.Window.Handle);
+                this._btnBack.InvokeClick();
+            }
         }
 
         public override void LoadContent()
@@ -78,11 +115,17 @@ namespace HSGomoku.Engine.Screens
             // HUD
             this._gameHUD.Load(this._content, this._graphics);
 
+            // 额外HUD文字
+            this._fontX = new SpriteFontX(FNAFont.Font16, this._graphics);
+
             base.LoadContent();
         }
 
         public override void Shutdown()
         {
+            // 通知服务器客户端已离开
+            var msg = this._client?.CreateGameMessage<ClientLeaveMessage>();
+            this._client?.SendMessage(msg);
             this._board = null;
             this._btnSurrender = null;
             this._btnBack = null;
@@ -90,7 +133,16 @@ namespace HSGomoku.Engine.Screens
 
             this._gameboard = null;
 
-            this._client?.Shutdown();
+            this._connectTimer?.Stop();
+            this._connectTimer?.Dispose();
+
+            new Thread(() =>
+            {
+                // 防止客户端销毁时，消息还没能发送过去
+                Thread.Sleep(10);
+                this._client?.Shutdown();
+            }).Start();
+            PlayerType = PlayerState.None;
 
             base.Shutdown();
         }
@@ -103,7 +155,8 @@ namespace HSGomoku.Engine.Screens
 
             if (this._surrender)
             {
-                RaiseSurrenderEvent(CurrentPlayerState);
+                this._surrender = false;
+                RaiseSurrenderEvent();
             }
 
             // 接收服务器传来的消息
@@ -130,6 +183,12 @@ namespace HSGomoku.Engine.Screens
                         if (status == NetConnectionStatus.Connected)
                         {
                             Console.WriteLine("connected to" + msg.SenderConnection.RemoteUniqueIdentifier);
+                            // 连接服务器成功，关闭监测线程
+                            this._connected = true;
+                            this._connectTimer.Stop();
+                            this._connectTime = 0;
+                            // 向服务器发送握手消息
+                            SendClientJoinRequest();
                         }
                         break;
 
@@ -138,7 +197,7 @@ namespace HSGomoku.Engine.Screens
                         var message = SerializeTools.Deserialize<GameMessage>(data);
                         //Console.WriteLine(message.ClientId + "-" + message.Content + "-" + (Int32)message.MsgCode);
                         OnMessage(message);
-                        this._client.SendMessage(this._client.CreateGameMessage<HelloMessage>());
+                        //this._client.SendMessage(this._client.CreateGameMessage<HelloMessage>());
                         break;
                 }
                 this._client.NetClient.Recycle(msg);
@@ -163,7 +222,10 @@ namespace HSGomoku.Engine.Screens
                                 null,
                                 Resolution.GetTransformationMatrix());
 
-            this._spriteBatch?.Draw(this._board, Vector2.Zero, Color.White);
+            if (this._board != null)
+            {
+                this._spriteBatch?.Draw(this._board, Vector2.Zero, Color.White);
+            }
 
             this._btnSurrender?.Draw(this._spriteBatch, gameTime);
 
@@ -174,72 +236,123 @@ namespace HSGomoku.Engine.Screens
             // HUD
             this._gameHUD?.Draw(this._spriteBatch);
 
+            // 额外HUD文字
+            this._spriteBatch.DrawStringX(this._fontX, "游戏状态: ", new Vector2(1470, 1000), Color.Black);
+            this._spriteBatch.DrawStringX(this._fontX, "", new Vector2(1500, 1050), Color.Black);
+
             this._gameboard?.Draw(this._spriteBatch, gameTime);
 
             base.Draw(gameTime);
         }
 
-        private void OnMessage(GameMessage message)
+        private void RaiseSurrenderEvent()
         {
-            SDL2.SDL.SDL_ShowSimpleMessageBox(
-                            SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
-                            "OnMessage",
-                            message.ClientId + "-" + message.MsgCode + "-" + message.Content,
-                            Game.Window.Handle);
+            this._btnSurrender.Enabled = false;
+            var msg = this._client.CreateGameMessage<PlayerSurrenderMessage>();
+            this._client.SendMessage(msg);
         }
 
-        private void RaiseSurrenderEvent(PlayerState p)
-        {
-            CurrentPlayerState = PlayerState.None;
-            var result = SDL2.SDL.SDL_ShowSimpleMessageBox(
-                            SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
-                            "游戏结束",
-                            $"{(p == PlayerState.Black ? "黑棋" : "白旗")}认输了",
-                            Game.Window.Handle);
-            Reset();
-        }
-
-        public void RaiseWinningEvent(PlayerState p)
+        private void RaiseWinningEvent()
         {
             var msg = this._client.CreateGameMessage<GameEndMessage>();
+            msg.ExtraData["Draw"] = false;
             this._client.SendMessage(msg);
-            CurrentPlayerState = PlayerState.None;
-            SDL2.SDL.SDL_ShowSimpleMessageBox(
-                            SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
-                            "游戏结束",
-                            $"{(p == PlayerState.Black ? "黑棋" : "白旗")}胜利了",
-                            Game.Window.Handle);
-            Reset();
         }
 
         private void RaiseDrawEvent()
         {
             var msg = this._client.CreateGameMessage<GameEndMessage>();
+            msg.ExtraData["Draw"] = true;
             this._client.SendMessage(msg);
+        }
+
+        private void RaiseLeaveWinEventTrue()
+        {
+            CurrentPlayerState = PlayerState.None;
+            SDL2.SDL.SDL_ShowSimpleMessageBox(
+                            SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
+                            "游戏结束",
+                            "对手离开了游戏, 你赢了",
+                            Game.Window.Handle);
+            this._btnBack.InvokeClick();
+        }
+
+        private void RaiseSurrenderWinEventTrue()
+        {
+            CurrentPlayerState = PlayerState.None;
+            SDL2.SDL.SDL_ShowSimpleMessageBox(
+                            SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
+                            "游戏结束",
+                            "对手投降, 你赢了",
+                            Game.Window.Handle);
+            this._btnBack.InvokeClick();
+        }
+
+        private void RaiseSurrenderLostEventTrue()
+        {
+            CurrentPlayerState = PlayerState.None;
+            SDL2.SDL.SDL_ShowSimpleMessageBox(
+                            SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
+                            "游戏结束",
+                            "你投降了, 你输了",
+                            Game.Window.Handle);
+            this._btnBack.InvokeClick();
+        }
+
+        private void RaiseWinningEventTrue()
+        {
+            CurrentPlayerState = PlayerState.None;
+            SDL2.SDL.SDL_ShowSimpleMessageBox(
+                            SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
+                            "游戏结束",
+                            "你赢了",
+                            Game.Window.Handle);
+            this._btnBack.InvokeClick();
+        }
+
+        private void RaiseLostEventTrue()
+        {
+            new Thread(() =>
+            {
+                CurrentPlayerState = PlayerState.None;
+                SDL2.SDL.SDL_ShowSimpleMessageBox(
+                                SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
+                                "游戏结束",
+                                "你输了",
+                                Game.Window.Handle);
+                this._btnBack.InvokeClick();
+            }).Start();
+        }
+
+        private void RaiseDrawEventTrue()
+        {
             CurrentPlayerState = PlayerState.None;
             SDL2.SDL.SDL_ShowSimpleMessageBox(
                             SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
                             "游戏结束",
                             "平局",
                             Game.Window.Handle);
-            Reset();
+            this._btnBack.InvokeClick();
         }
 
-        private void RaisePlaceChessEvent()
+        private void RaisePlaceChessEvent(Int32 x, Int32 y)
         {
             var msg = this._client.CreateGameMessage<PlayerPlaceChessMessage>();
             msg.Content = $"{CurrentPlayerState}-{LastChessPosition}";
+            msg.ExtraData["X"] = x;
+            msg.ExtraData["Y"] = y;
             this._client.SendMessage(msg);
             CurrentPlayerState = CurrentPlayerState == PlayerState.Black ? PlayerState.White : PlayerState.Black;
         }
 
-        public void Reset()
+        private void Reset()
         {
             this._surrender = false;
             this._gameboard?.Reset();
 
             LastChessPosition = new Vector2(-1, -1);
             CurrentPlayerState = PlayerState.Black;
+            PlayerType = PlayerState.None;
         }
 
         public void PlaceChess(Int32 x, Int32 y, Boolean checkWin = true)
@@ -279,18 +392,20 @@ namespace HSGomoku.Engine.Screens
 
                 if (linkCount >= GameBoard.winChessCount)
                 {
-                    RaiseWinningEvent(CurrentPlayerState);
+                    RaisePlaceChessEvent(x, y);
+                    RaiseWinningEvent();
                 }
                 else
                 {
                     // 检测是否平局
                     if (this._gameboard._chessNumber == GameBoard.crossCount * GameBoard.crossCount)
                     {
+                        RaisePlaceChessEvent(x, y);
                         RaiseDrawEvent();
                     }
                     else
                     {
-                        RaisePlaceChessEvent();
+                        RaisePlaceChessEvent(x, y);
                     }
                 }
             }

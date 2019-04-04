@@ -8,7 +8,7 @@ namespace HSGomoku.Network
 
         public static String ServerName => "HSGomoku Server";
 
-        public static String IpAddress => "127.0.0.1";
+        public static String IpAddress => "10.129.12.33";
 
         public static Int32 Port => 13459;
 
