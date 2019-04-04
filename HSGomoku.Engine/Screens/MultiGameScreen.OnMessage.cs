@@ -30,7 +30,6 @@ namespace HSGomoku.Engine.Screens
                     break;
 
                 // 对手离开了游戏
-
                 case MsgCode.ClientLeave:
                     ClientLeave();
                     break;
@@ -70,12 +69,14 @@ namespace HSGomoku.Engine.Screens
 
         private void ClientJoin()
         {
+            this._gameStatus = "向服务器发送匹配请求...";
             var msg = this._client.CreateGameMessage<ClientMatchMessage>();
             this._client.SendMessage(msg);
         }
 
         private void ClientMatch()
         {
+            this._gameStatus = "正在匹配对手...";
         }
 
         private void ClientLeave()
@@ -90,6 +91,7 @@ namespace HSGomoku.Engine.Screens
             CurrentPlayerState = PlayerState.Black;
             var msg = this._client.CreateGameMessage<GameStartMessage>();
             this._client.SendMessage(msg);
+            this._gameStatus = "匹配成功，开始游戏";
 
             // 允许投降
             this._btnSurrender.Enabled = true;
@@ -97,6 +99,7 @@ namespace HSGomoku.Engine.Screens
 
         private void GameEnd(GameMessage message)
         {
+            this._gameStatus = "游戏结束";
             var draw = (Boolean)message.ExtraData["Draw"];
             if (draw)
             {

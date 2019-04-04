@@ -22,7 +22,7 @@ namespace HSGomoku.Network
         public NetworkServer()
         {
             this._config = new NetPeerConfiguration(NetworkSetting.AppIdentifier);
-            this._config.LocalAddress = IPAddress.Parse(NetworkSetting.IpAddress);
+            this._config.LocalAddress = IPAddress.Parse(NetworkSetting.LocalIpAddress);
             this._config.Port = NetworkSetting.Port;
 
             this._config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);

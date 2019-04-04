@@ -39,6 +39,8 @@ namespace HSGomoku.Engine.Screens
         private Int32 _connectTime;
         private Timer _connectTimer;
 
+        private String _gameStatus;
+
         public MultiGameScreen(Game game) : base(game)
         {
         }
@@ -86,6 +88,7 @@ namespace HSGomoku.Engine.Screens
             this._connectTimer.Start();
             CurrentPlayerState = PlayerState.None;
             PlayerType = PlayerState.None;
+            this._gameStatus = "正在寻找服务器...";
 
             base.Init();
         }
@@ -168,6 +171,7 @@ namespace HSGomoku.Engine.Screens
                 {
                     case NetIncomingMessageType.DiscoveryResponse:
                         Console.WriteLine("Found server at " + msg.SenderEndPoint + " name: " + msg.ReadString());
+                        this._gameStatus = "已找到服务器，正在连接...";
                         this._client.Connect(msg.SenderEndPoint);
                         break;
 
@@ -182,8 +186,9 @@ namespace HSGomoku.Engine.Screens
                         NetConnectionStatus status = (NetConnectionStatus)msg.ReadByte();
                         if (status == NetConnectionStatus.Connected)
                         {
-                            Console.WriteLine("connected to" + msg.SenderConnection.RemoteUniqueIdentifier);
+                            Console.WriteLine("connected to" + msg.SenderEndPoint);
                             // 连接服务器成功，关闭监测线程
+                            this._gameStatus = "连接服务器成功";
                             this._connected = true;
                             this._connectTimer.Stop();
                             this._connectTime = 0;
@@ -195,7 +200,7 @@ namespace HSGomoku.Engine.Screens
                     case NetIncomingMessageType.Data:
                         var data = msg.Data;
                         var message = SerializeTools.Deserialize<GameMessage>(data);
-                        //Console.WriteLine(message.ClientId + "-" + message.Content + "-" + (Int32)message.MsgCode);
+                        Console.WriteLine(message.ClientId + "-" + message.Content + "-" + (Int32)message.MsgCode);
                         OnMessage(message);
                         //this._client.SendMessage(this._client.CreateGameMessage<HelloMessage>());
                         break;
@@ -238,7 +243,7 @@ namespace HSGomoku.Engine.Screens
 
             // 额外HUD文字
             this._spriteBatch.DrawStringX(this._fontX, "游戏状态: ", new Vector2(1470, 1000), Color.Black);
-            this._spriteBatch.DrawStringX(this._fontX, "", new Vector2(1500, 1050), Color.Black);
+            this._spriteBatch.DrawStringX(this._fontX, this._gameStatus, new Vector2(1500, 1050), Color.Black);
 
             this._gameboard?.Draw(this._spriteBatch, gameTime);
 

@@ -44,12 +44,12 @@ namespace HSGomoku.Engine.UI
             // 玩家1信息
             spriteBatch.DrawStringX(this._fontX, "黑棋 :", new Vector2(1470, 150), Color.Black);
             spriteBatch.DrawStringX(this._fontX, "玩家1", new Vector2(1500, 200), Color.Black);
-            spriteBatch.DrawStringX(this._fontX, "已走x步", new Vector2(1500, 250), Color.Black);
+            //spriteBatch.DrawStringX(this._fontX, "已走x步", new Vector2(1500, 250), Color.Black);
 
             // 玩家2信息
             spriteBatch.DrawStringX(this._fontX, "白棋 :", new Vector2(1470, 450), Color.Black);
             spriteBatch.DrawStringX(this._fontX, "玩家2", new Vector2(1500, 500), Color.Black);
-            spriteBatch.DrawStringX(this._fontX, "已走x步", new Vector2(1500, 550), Color.Black);
+            //spriteBatch.DrawStringX(this._fontX, "已走x步", new Vector2(1500, 550), Color.Black);
 
             // 对局信息
             String playerType = String.Empty;

@@ -36,14 +36,14 @@ namespace HSGomoku.Network
 
         public void DiscoverPeers()
         {
-            this._client.DiscoverKnownPeer(NetworkSetting.IpAddress, NetworkSetting.Port);
+            this._client.DiscoverKnownPeer(NetworkSetting.ServerIpAddress, NetworkSetting.Port);
         }
 
         public void Connect()
         {
             NetOutgoingMessage approval = this._client.CreateMessage();
             approval.Write(NetworkSetting.Encryptionkey);
-            this._client.Connect(NetworkSetting.IpAddress, NetworkSetting.Port, approval);
+            this._client.Connect(NetworkSetting.ServerIpAddress, NetworkSetting.Port, approval);
         }
 
         public void Connect(IPEndPoint remoteEndPoint)
