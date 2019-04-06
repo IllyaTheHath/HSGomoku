@@ -1,9 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Timers;
-
-using HSGomoku.Engine.Components;
+﻿using HSGomoku.Engine.Components;
 using HSGomoku.Engine.ScreenManage;
 using HSGomoku.Engine.UI;
 using HSGomoku.Engine.Utilities;
@@ -14,7 +9,13 @@ using HSGomoku.Network.Utils;
 using Lidgren.Network;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
+
+using System;
+using System.Linq;
+using System.Threading;
+using System.Timers;
 
 using static HSGomoku.Engine.Utilities.Statistics;
 
@@ -29,6 +30,7 @@ namespace HSGomoku.Engine.Screens
         private Button _btnBack;
         private GameHUD _gameHUD;
         private SpriteFontX _fontX;
+        private SoundEffect _placeChessSound;
 
         private GameBoard _gameboard;
         private NetworkClient _client;
@@ -96,9 +98,9 @@ namespace HSGomoku.Engine.Screens
         private void Timer_Elapsed(Object sender, ElapsedEventArgs e)
         {
             this._connectTime += 100;
-            if (this._connectTime > 3000 && !this._connected)
+            if (this._connectTime > 10000 && !this._connected)
             {
-                //  连接服务器失败
+                // 连接服务器失败
                 this._connectTimer.Stop();
                 this._connectTime = 0;
                 SDL2.SDL.SDL_ShowSimpleMessageBox(
@@ -120,6 +122,9 @@ namespace HSGomoku.Engine.Screens
 
             // 额外HUD文字
             this._fontX = new SpriteFontX(FNAFont.Font16, this._graphics);
+
+            // 音效
+            this._placeChessSound = this._content.Load<SoundEffect>("audio\\place");
 
             base.LoadContent();
         }
@@ -350,6 +355,17 @@ namespace HSGomoku.Engine.Screens
             CurrentPlayerState = CurrentPlayerState == PlayerState.Black ? PlayerState.White : PlayerState.Black;
         }
 
+        private void RaiseServerShutdownEvent()
+        {
+            CurrentPlayerState = PlayerState.None;
+            SDL2.SDL.SDL_ShowSimpleMessageBox(
+                            SDL2.SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
+                            "服务器已关闭",
+                            "服务器关闭，游戏将强制退出",
+                            Game.Window.Handle);
+            this._btnBack.InvokeClick();
+        }
+
         private void Reset()
         {
             this._surrender = false;
@@ -377,6 +393,7 @@ namespace HSGomoku.Engine.Screens
             }
 
             chessButton.HasChess = true;
+            this._placeChessSound.Play();
             LastChessPosition = chessButton.BoardPosition;
             if (CurrentPlayerState == PlayerState.White)
             {

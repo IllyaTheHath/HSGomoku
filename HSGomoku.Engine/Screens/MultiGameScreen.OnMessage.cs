@@ -53,11 +53,13 @@ namespace HSGomoku.Engine.Screens
                 case MsgCode.PlayerSurrender:
                     PlayerSurrender(message);
                     break;
-
+                // 服务器关闭，结束游戏
+                case MsgCode.ServerShutdown:
+                    RaiseServerShutdownEvent();
+                    break;
                 // 不会从服务器发来的消息
                 case MsgCode.GameStart:
                 case MsgCode.ServerRespondJoin:
-                case MsgCode.ServerShutdown:
                 // 无意义消息
                 case MsgCode.Hello:
                 case MsgCode.EmptyMessage:
